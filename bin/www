@@ -37,6 +37,14 @@ app.use(function (req, res, next) {
 
 // Chargement de socket.io
 var io = require('socket.io').listen(server);
+io.origins('*:*') // for latest version
+
+io.origins((origin, callback) => {
+  if (origin !== 'https://biosain-front.herokuapp.com') {
+      return callback('origin not allowed', false);
+  }
+  callback(null, true);
+});
 
 // Quand un client se connecte, on le note dans la console
 io.sockets.on('connection', function (socket) {
