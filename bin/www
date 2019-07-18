@@ -17,7 +17,6 @@ io.sockets.on('connection', function (socket) {
     console.log('Un client est connecté !');
 });
 
-
 io.on('connect', (socket) => {
     var sock = socket
     sock.on('updateCoords', (data) => {
