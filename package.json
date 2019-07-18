@@ -1,0 +1,24 @@
+{
+  "name": "vue-shopping-cart",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "start": "node ./bin/www",
+    "dev": "node ./bin/www",
+    "debug": "ndb npm run dev"
+  },
+  "author": "Dang Van Thanh <chieuhue@gmail.com> (dangthanh.org)",
+  "license": "MIT",
+  "dependencies": {
+    "bcrypt": "^3.0.6",
+    "body-parser": "^1.18.3",
+    "cors": "^2.8.5",
+    "express": "^4.16.4",
+    "faker": "^4.1.0",
+    "mongoose": "5.4.2",
+    "mongoose-paginate": "^5.0.3",
+    "mongoose-unique-validator": "^2.0.1",
+    "socket.io": "^2.2.0"
+  }
+}
