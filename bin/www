@@ -11,7 +11,7 @@ app.set('port', port);
 var server = http.createServer(app);
 
 const cors = require('cors');
-const whitelist = ['http://localhost:8080', 'https://biosain-front.herokuapp.com'];
+const whitelist = ['http://localhost:8080', 'https://herokuapp.com'];
 const corsOptions = {
   credentials: true, // This is important.
   origin: (origin, callback) => {
@@ -26,9 +26,11 @@ app.use(cors(corsOptions));
 
 // Chargement de socket.io
 var io = require('socket.io').listen(server);
-io.origins('https://biosain-front.herokuapp.com') // for latest version
-io.set('origins', 'https://biosain-front.herokuapp.com');
+io.origins('https://herokuapp.com') // for latest version
+io.set('origins', 'https://herokuapp.com');
 
+var allowedOrigins = "herokuapp.com:*";
+ io(server,{origins:allowedOrigins});
 // Quand un client se connecte, on le note dans la console
 io.sockets.on('connection', function (socket) {
     console.log('Un client est connecté !');
