@@ -8,10 +8,7 @@ const mongoose = require('./config/mongoose');
 const model = require('./app.model');
 
 app.use(cors({
-  origin: function(origin, callback){
-    return callback(null, true);
-  },
-  optionsSuccessStatus: 200,
+  origin: 'https://biosain-front.herokuapp.com',
   credentials: true
 }));
 
