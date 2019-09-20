@@ -4,8 +4,13 @@ exports.findAll = async (req, res, next) => {
   try {
     const page = parseInt(req.query.page, 10) || 1;
     const pagesize = parseInt(req.query.pagesize) || 8;
+    const month = req.query.month
+    let filters = {}
+    if (month) {
+      filters = { months: parseInt(month, 10) }
+    }
     const products = await Product.paginate(
-      {},
+      filters,
       { page: page, limit: pagesize }
     );
 
@@ -41,6 +46,17 @@ exports.findById = async (req, res, next) => {
     const product = await Product.findById(req.params.id).lean();
     res.json({ product });
   } catch (error) {
+    res.status(500).json(error);
+  }
+};
+
+exports.update = async (req, res, next) => {
+  try {
+    const updatedProduct = req.body;
+    const product = await Product.update({_id: updatedProduct._id}, updatedProduct);
+    res.json(updatedProduct)
+  } catch (error) {
+    console.log(error)
     res.status(500).json(error);
   }
 };

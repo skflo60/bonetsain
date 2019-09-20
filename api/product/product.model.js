@@ -8,7 +8,8 @@ const ProductSchema = new Schema({
   category: String,
   image: String,
   description: String,
-  createdAt: Date
+  createdAt: Date,
+  months: [Number]
 });
 
 ProductSchema.plugin(mongoosePaginate);

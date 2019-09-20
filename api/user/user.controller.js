@@ -18,13 +18,13 @@ module.exports = {
         } else {
           res.status(201).json({
             success: false,
-            msg: 'Wrong username or password'
+            msg: 'Mauvais login / mot de passe'
           });
         }
       } else {
         res.status(201).json({
           success: false,
-          msg: 'Required username or password'
+          msg: 'Login et mot de passe requis'
         });
       }
     } catch (error) {
