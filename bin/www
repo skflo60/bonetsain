@@ -10,22 +10,22 @@ app.set('port', port);
 var server = http.createServer(app);
 
 // Chargement de socket.io
-//var io = require('socket.io').listen(server);
+var io = require('socket.io').listen(server);
 
-//io.origins('*:*') // for latest version
+io.origins('*:*') // for latest version
 
 // Quand un client se connecte, on le note dans la console
-//io.sockets.on('connection', function (socket) {
-//    console.log('Un client est connecté !');
-//});
+io.sockets.on('connection', function (socket) {
+    console.log('Un client est connecté !');
+});
 
-/**io.on('connect', (socket) => {
+io.on('connect', (socket) => {
     var sock = socket
     sock.on('updateCoords', (data) => {
       console.log("Receiving new coords ! ", data)
       io.emit('newCoords', data);
     })
-})*/
+})
 
 server.listen(port);
 server.on('error', onError);
