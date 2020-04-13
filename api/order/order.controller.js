@@ -9,7 +9,7 @@ exports.findAll = async (req, res, next) => {
     filters.shop = req.query.shop
     const orders = await Order.paginate(
       filters,
-      { page: page, limit: pagesize }
+      { page: page, limit: pagesize, sort: {createdAt: -1} }
     );
     console.log(filters, orders);
     res.status(200).json({

@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const Product = require('./product.model');
 
 exports.findAll = async (req, res, next) => {
@@ -9,11 +10,12 @@ exports.findAll = async (req, res, next) => {
     if (month) {
       filters = { months: parseInt(month, 10) }
     }
+    filters.shop = new mongoose.Types.ObjectId(req.query.shop)
     const products = await Product.paginate(
       filters,
       { page: page, limit: pagesize }
     );
-
+    console.log(filters, products);
     res.status(200).json({
       products: products.docs,
       currentPage: page,
@@ -29,7 +31,7 @@ exports.findRelated = async (req, res, next) => {
     const product = await Product.findById(req.params.id).lean();
     const productSize = 3;
     const products = await Product.aggregate([
-      { $match: { category: product.category } },
+      { $match: { category: product.category, shop: product.shop } },
       { $sample: { size: productSize } }
     ]);
     res.status(200).json({

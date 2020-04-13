@@ -1,6 +1,7 @@
 const CONFIG = require('../../config/config')
 const stripe = require('stripe')('sk_test_WkZb6QtYaD3nzlVSxbIFXXhQ00Txor8IU5');
 const Order = require('../order/order.model');
+const DELIVERY_COST = 4.9
 
 function groupBy(xs, key) {
   return xs.reduce(function(rv, x) {
@@ -12,7 +13,7 @@ function groupBy(xs, key) {
 exports.getSession = async (req, res, next) => {
   const order = req.body;
   const cart = order.cart || [];
-  const amount = Number(cart.map(c=>c.subtotal).reduce((acc, val) => acc + val) + (order.delivery ? 4.9 : 0)) * 100;
+  const amount = Math.round(Number(cart.map(c=>c.subtotal).reduce((acc, val) => acc + val) + (order.delivery ? DELIVERY_COST : 0)) * 100);
   (async () => {
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
@@ -20,7 +21,7 @@ exports.getSession = async (req, res, next) => {
       line_items: [{
         name: `Commande Local & Frais`,
         description: cart.map(p=>p.name).join(', '),
-        images: cart.map(p=>p.image),
+        images: ['https://localfrais.fr/legumes.jpg'],
         amount,
         currency: 'eur',
         quantity: 1,
@@ -35,6 +36,7 @@ exports.getSession = async (req, res, next) => {
     Object.keys(groupedCart).forEach(async shopKey => {
       order.shop = shopKey
       order.cart = groupedCart[shopKey]
+      order.total_ttc = Number(order.cart.map(c=>c.subtotal).reduce((acc, val) => acc + val) + (order.delivery ? DELIVERY_COST : 0)) * 100;
       await Order.create(order)
     });
     res.json(session)
