@@ -13,6 +13,7 @@ module.exports = {
 
         if (isMatch) {
           res.status(201).json({
+            user,
             success: true
           });
         } else {
@@ -31,7 +32,12 @@ module.exports = {
       res.status(500).json(error);
     }
   },
-
+  logout: async (req, res, next) => {
+    res.status(200).json({
+      success: true,
+      msg: 'Logout'
+    });
+  },
   signup: async (req, res, next) => {
     try {
       const { username, password } = req.body;

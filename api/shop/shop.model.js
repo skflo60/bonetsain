@@ -6,6 +6,8 @@ const ShopSchema = new Schema({
   name: String,
   description: String,
   image: String,
+  color: String,
+  openings: [{weekday: Number, start: String, end: String}],
   services: [String]
 });
 
