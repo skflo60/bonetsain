@@ -7,6 +7,8 @@ const routes = require('./api');
 const mongoose = require('./config/mongoose');
 const model = require('./app.model');
 
+app.use(express.json({limit: '50mb'}));
+app.use(express.urlencoded({limit: '50mb'}));
 app.use(cors());
 // Add headers
 app.use(function (req, res, next) {
