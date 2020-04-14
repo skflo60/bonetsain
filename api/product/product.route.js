@@ -6,5 +6,6 @@ router.route('/').get(productController.findAll);
 router.route('/:id').get(productController.findById);
 router.route('/:id/related').get(productController.findRelated);
 router.route('/').post(productController.update);
+router.route('/').put(productController.create);
 
 module.exports = router;

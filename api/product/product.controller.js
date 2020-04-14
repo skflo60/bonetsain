@@ -15,7 +15,6 @@ exports.findAll = async (req, res, next) => {
       filters,
       { page: page, limit: pagesize }
     );
-    console.log(filters, products);
     res.status(200).json({
       products: products.docs,
       currentPage: page,
@@ -57,6 +56,18 @@ exports.update = async (req, res, next) => {
     const updatedProduct = req.body;
     const product = await Product.update({_id: updatedProduct._id}, updatedProduct);
     res.json(updatedProduct)
+  } catch (error) {
+    console.log(error)
+    res.status(500).json(error);
+  }
+};
+
+exports.create = async (req, res, next) => {
+  try {
+    const createdProduct = req.body;
+    console.log('creating product', createdProduct);
+    const product = await Product.create(createdProduct);
+    res.json(product)
   } catch (error) {
     console.log(error)
     res.status(500).json(error);
