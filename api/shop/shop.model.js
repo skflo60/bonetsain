@@ -7,6 +7,12 @@ const ShopSchema = new Schema({
   description: String,
   image: String,
   color: String,
+  address: String,
+  postalCode: String,
+  city: String,
+  phone: String,
+  email: String,
+  days: [{}],
   openings: [{weekday: Number, start: String, end: String}],
   services: [String]
 });
