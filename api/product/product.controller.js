@@ -44,7 +44,7 @@ exports.findRelated = async (req, res, next) => {
 
 exports.findById = async (req, res, next) => {
   try {
-    const product = await Product.findById(req.params.id).lean();
+    const product = await Product.findById(req.params.id).populate('category').lean();
     res.json({ product });
   } catch (error) {
     res.status(500).json(error);
