@@ -10,12 +10,19 @@ const ShopSchema = new Schema({
   address: String,
   postalCode: String,
   city: String,
+  location: {
+    type: { type: String },
+    coordinates: [Number],
+  },
   phone: String,
   email: String,
+  orderable: Boolean,
   days: [{}],
   openings: [{weekday: Number, start: String, end: String}],
   services: [String]
 });
+
+ShopSchema.index({ "location" : "2dsphere" })
 
 ShopSchema.plugin(mongoosePaginate);
 

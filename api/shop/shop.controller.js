@@ -2,21 +2,27 @@ const Shop = require('./shop.model');
 
 exports.findAll = async (req, res, next) => {
   try {
-    const page = parseInt(req.query.page, 10) || 1;
-    const pagesize = parseInt(req.query.pagesize) || 8;
-    const month = req.query.month
     let filters = {}
-    const shops = await Shop.paginate(
-      filters,
-      { page: page, limit: pagesize }
-    );
-
-    res.status(200).json({
-      shops: shops.docs,
-      currentPage: page,
-      pages: shops.pages
-    });
+    let shops = []
+    console.log(req.query.address);
+    if (req.query.lat && req.query.lng) {
+      let lat = parseFloat(req.query.lat)
+      let lng = parseFloat(req.query.lng)
+      shops = await Shop.aggregate([{
+        $geoNear: {
+          near: { type: "Point", coordinates: [ lng, lat ] },
+          key: "location",
+          distanceField: "dist.calculated",
+          spherical: true,
+          query: {}
+        }
+      }])
+    } else {
+      shops = await Shop.find()
+    }
+    res.status(200).json({shops});
   } catch (error) {
+    console.log(error)
     res.status(500).json(error);
   }
 };
