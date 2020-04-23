@@ -16,7 +16,7 @@ const ShopSchema = new Schema({
   },
   phone: String,
   email: String,
-  orderable: Boolean,
+  orderable: { type: Boolean, default: true },
   days: [{}],
   openings: [{weekday: Number, start: String, end: String}],
   services: [String]

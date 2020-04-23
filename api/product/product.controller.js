@@ -27,10 +27,10 @@ exports.findAll = async (req, res, next) => {
 
 exports.findRelated = async (req, res, next) => {
   try {
-    const product = await Product.findById(req.params.id).lean();
+    const product = await Product.findById(req.params.id).populate("shop").lean();
     const productSize = 3;
     const products = await Product.aggregate([
-      { $match: { category: product.category, shop: product.shop } },
+      { $match: { category: product.category, shop: product.shop._id } },
       { $sample: { size: productSize } }
     ]);
     res.status(200).json({
@@ -58,6 +58,17 @@ exports.update = async (req, res, next) => {
     res.json(updatedProduct)
   } catch (error) {
     console.log(error)
+    res.status(500).json(error);
+  }
+};
+
+exports.remove = async (req, res, next) => {
+  try {
+    const id = req.query.id;
+    const product = await Product.deleteOne({ _id: id });
+    res.json(product)
+  } catch (error) {
+    console.log(error);
     res.status(500).json(error);
   }
 };
