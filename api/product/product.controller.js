@@ -4,7 +4,7 @@ const Product = require('./product.model');
 exports.findAll = async (req, res, next) => {
   try {
     const page = parseInt(req.query.page, 10) || 1;
-    const pagesize = parseInt(req.query.pagesize) || 8;
+    const pagesize = parseInt(req.query.pagesize) || 100;
     const month = req.query.month
     let filters = {}
     if (month) {
@@ -64,7 +64,7 @@ exports.update = async (req, res, next) => {
 
 exports.remove = async (req, res, next) => {
   try {
-    const id = req.query.id;
+    const id = req.params.id;
     const product = await Product.deleteOne({ _id: id });
     res.json(product)
   } catch (error) {
