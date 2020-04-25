@@ -40,12 +40,19 @@ module.exports = {
   },
   signup: async (req, res, next) => {
     try {
-      const { username, password } = req.body;
+      const { username, password, name } = req.body;
       const hash = await bcrypt.hash(password, saltRounds);
+
+      const shop = new Shop({
+        name
+      });
+
+      const persistedShop = await shop.save();
 
       const user = new User({
         username,
-        password: hash
+        password: hash,
+        shop: persistedShop._id
       });
 
       const persistedUser = await user.save();
