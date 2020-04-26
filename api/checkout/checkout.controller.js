@@ -13,7 +13,9 @@ function groupBy(xs, key) {
 exports.getSession = async (req, res, next) => {
   const order = req.body;
   const cart = order.cart || [];
-  const amount = Math.round(Number(cart.map(c=>c.subtotal).reduce((acc, val) => acc + val) + (order.delivery ? DELIVERY_COST : 0)) * 100);
+  const groupedCart = groupBy(order.cart, 'shop');
+  const shops = Object.keys(groupedCart)
+  const amount = Math.round(Number(cart.map(c=>c.subtotal).reduce((acc, val) => acc + val) + (order.delivery ? DELIVERY_COST * shops.length : 0)) * 100);
   (async () => {
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
@@ -31,9 +33,8 @@ exports.getSession = async (req, res, next) => {
     });
     order.session_id = session.id
     order.state = 'waiting'
-    const groupedCart = groupBy(order.cart, 'shop');
     // Create Order by shop
-    Object.keys(groupedCart).forEach(async shopKey => {
+    shops.forEach(async shopKey => {
       order.shop = shopKey
       order.cart = groupedCart[shopKey]
       order.total_ttc = Number(order.cart.map(c=>c.subtotal).reduce((acc, val) => acc + val) + (order.delivery ? DELIVERY_COST : 0)) * 100;

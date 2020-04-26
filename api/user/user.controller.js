@@ -1,5 +1,6 @@
 const bcrypt = require('bcrypt');
 const User = require('./user.model');
+const Shop = require('../shop/shop.model');
 const saltRounds = 10;
 
 module.exports = {
@@ -40,26 +41,36 @@ module.exports = {
   },
   signup: async (req, res, next) => {
     try {
-      const { username, password, name } = req.body;
+      const { username, password, name, validatedAddress } = req.body;
       const hash = await bcrypt.hash(password, saltRounds);
 
-      const shop = new Shop({
-        name
-      });
+      const user = await User.findOne({ username });
 
-      const persistedShop = await shop.save();
+      if (!user) {
+        const shop = new Shop({
+          name,
+          address: validatedAddress.properties.name,
+          postalCode: validatedAddress.properties.postcode,
+          city: validatedAddress.properties.city,
+          location: validatedAddress.geometry
+        });
 
-      const user = new User({
-        username,
-        password: hash,
-        shop: persistedShop._id
-      });
+        const persistedShop = await shop.save();
 
-      const persistedUser = await user.save();
+        const user = new User({
+          username,
+          password: hash,
+          shop: persistedShop._id
+        });
 
-      res.status(201).json({
-        success: true
-      });
+        const persistedUser = await user.save();
+
+        res.status(201).json({
+          success: true
+        });
+      } else {
+        res.status(400).json("Login déjà pris")
+      }
     } catch (error) {
       res.status(500).json(error);
     }
