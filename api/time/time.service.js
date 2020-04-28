@@ -27,9 +27,8 @@ const isAnOpeningTime = (currentTime = "17:00", dayTimes = []) => {
 }
 
 // Time = { weekday, start, end }, a day can have multiple time
-const getDifferentTimes = (now = moment(), shopsTimes = [], deliveryMenTimes = [], unavailableTimes = [], estimatedDuration = -1) => {
+const getDifferentTimes = (now = moment(), ressourceTimes = []) => {
   let foundTimes = [];
-  console.log("PARAMS", shopsTimes, deliveryMenTimes, unavailableTimes, estimatedDuration);
   let currentTime = now.add(1, "hour")
   if (currentTime.minutes() > 30) {
     currentTime.add(1, "hour");
@@ -37,7 +36,7 @@ const getDifferentTimes = (now = moment(), shopsTimes = [], deliveryMenTimes = [
   currentTime.minutes(0);
 
   // For each shop
-  shopsTimes.forEach(shopTimes => {
+  ressourceTimes.forEach(shopTimes => {
     // We have some opening times // ex: 8:00 18:00
     tests = 0;
     while(foundTimes.length < 20 && tests < 50) {

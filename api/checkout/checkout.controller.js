@@ -28,8 +28,8 @@ exports.getSession = async (req, res, next) => {
         currency: 'eur',
         quantity: 1,
       }],
-      success_url: CONFIG.front_url + '/payment?session_id={CHECKOUT_SESSION_ID}',
-      cancel_url: CONFIG.front_url + '/payment?session_id=null',
+      success_url:'https://localfrais.fr/payment?session_id={CHECKOUT_SESSION_ID}',
+      cancel_url: 'https://localfrais.fr/payment?session_id=null',
     });
     order.session_id = session.id
     order.state = 'waiting'

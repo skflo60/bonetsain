@@ -1,6 +1,6 @@
 const Shop = require('../shop/shop.model');
 const Order = require('../order/order.model');
-const DeliveryMen = require('./deliverymen.model.js');
+const User = require('../user/user.model.js');
 
 const { getDifferentTimes } = require('./time.service')
 const moment = require('moment');
@@ -13,18 +13,23 @@ exports.findAll = async (req, res, next) => {
     // Shop times
     for (let i=0; i<shops.length; i++) {
       const shop = shops[i];
-      const foundShop = await Shop.findById(shop, "_id name opening").lean();
-      openings.push(foundShop.opening)
+      const foundShop = await Shop.findById(shop, "_id name openings").lean();
+      openings.push(foundShop.openings)
     }
 
     // Livreur
-    const deliveryMan = await DeliveryMen.findOne().lean();
+    const deliveryMan = await User.findOne({_id: { $in: [req.query.deliverymen]}}).lean();
 
     // Commandes en cours
     const orders = await Order.find({ deliveryDate: { $gte: new Date() }});
     const unavailableTimes = orders ? orders.map(o=>o.selectedTime) : [];
     const now = moment()
-    const foundTimes = getDifferentTimes(now, openings, deliveryMan.availableTimes, unavailableTimes, req.query.duration);
+
+    const foundTimes = getDifferentTimes(now, openings);
+    const deliveryTimes = getDifferentTimes(now, [deliveryMan.availableTimes]);
+
+    console.log("SHOP", foundTimes);
+    console.log("LIVREUR", deliveryTimes);
 
     res.status(200).json({
       times: foundTimes

@@ -58,7 +58,7 @@ exports.isDeliveryPossible = async (req, res, next) => {
       }
     }])
     var deliveryMen = deliveryMenNearShop.filter(n => !deliveryMenNearUser.some(n2 => n._id == n2._id));
-    res.json({ result: deliveryMen.length });
+    res.json({ result: deliveryMen.length, deliveryMen });
   } catch (error) {
     console.log(error)
     res.status(500).json(error);

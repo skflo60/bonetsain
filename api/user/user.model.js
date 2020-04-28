@@ -12,11 +12,14 @@ const UserSchema = new Schema({
     required: true,
     minlength: 6
   },
+  address: String,
   location: {
     type: { type: String },
     coordinates: [Number],
   },
   type: String,
+  days: { monday: {}, thuesday: {}, wednesday: {}, thursday: {}, friday: {}, saturday: {}, sunday: {} },
+  availableTimes: [{weekday: Number, start: String, end: String}],
   shop: { type: Schema.ObjectId, ref: 'Shop' },
 });
 

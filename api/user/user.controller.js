@@ -39,6 +39,34 @@ module.exports = {
       msg: 'Logout'
     });
   },
+  getUserByLogin: async (req, res, next) => {
+    const foundUser = await User.findOne({username: req.query.login}, 'address days')
+    console.log(req.query.login, foundUser)
+    res.status(200).json({
+      success: true,
+      user: foundUser
+    });
+  },
+  update: async (req, res, next) => {
+    const user = req.body
+    user.availableTimes = []
+    // TODO transform it in a tool function
+    Object.keys(user.days).forEach((day, i) => {
+      dayTimes = user.days[day].forEach(time => {
+        if (time.isOpen) {
+          const start = time.open.substring(0, 2) + ':' + time.open.substring(2)
+          const end = time.close.substring(0, 2) + ':' + time.close.substring(2)
+          user.availableTimes.push({weekday: i, start, end})
+        }
+      })
+    });
+
+    const updatedUser = await User.findByIdAndUpdate(req.params.id, user)
+    res.status(200).json({
+      success: true,
+      user: updatedUser
+    });
+  },
   signup: async (req, res, next) => {
     try {
       const { username, password, name, validatedAddress } = req.body;
