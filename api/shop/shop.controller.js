@@ -4,7 +4,6 @@ exports.findAll = async (req, res, next) => {
   try {
     let filters = {}
     let shops = []
-    console.log(req.query.address);
     if (req.query.lat && req.query.lng) {
       let lat = parseFloat(req.query.lat)
       let lng = parseFloat(req.query.lng)
@@ -12,9 +11,7 @@ exports.findAll = async (req, res, next) => {
         $geoNear: {
           near: { type: "Point", coordinates: [ lng, lat ] },
           key: "location",
-          distanceField: "dist.calculated",
-          spherical: true,
-          query: {}
+          distanceField: "dist.calculated"
         }
       }])
     } else {

@@ -66,6 +66,7 @@ module.exports = {
         const persistedUser = await user.save();
 
         res.status(201).json({
+          user,
           success: true
         });
       } else {
