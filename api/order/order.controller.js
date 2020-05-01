@@ -1,7 +1,7 @@
 const Order = require('./order.model');
 const User = require('../user/user.model');
 const Shop = require('../shop/shop.model');
-const ACCEPTABLE_DISTANCE = 4000
+const ACCEPTABLE_DISTANCE = 8000
 
 exports.findAll = async (req, res, next) => {
   try {

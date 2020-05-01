@@ -1,7 +1,9 @@
 const CONFIG = require('../../config/config')
 const stripe = require('stripe')('sk_test_WkZb6QtYaD3nzlVSxbIFXXhQ00Txor8IU5');
 const Order = require('../order/order.model');
+const Shop = require('../shop/shop.model');
 const DELIVERY_COST = 4.9
+const sgMail = require('@sendgrid/mail');
 
 function groupBy(xs, key) {
   return xs.reduce(function(rv, x) {
@@ -9,6 +11,21 @@ function groupBy(xs, key) {
     return rv;
   }, {});
 };
+
+const sendMail = (shopMail, cart = [], customer_name = "", customer_email = "", customer_phone = "") => {
+  sgMail.setApiKey("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");
+  const msg = {
+    to: shopMail,
+    from: 'contact@localfrais.fr',
+    subject: 'Nouvelle commande !',
+    html: `<strong>Une nouvelle commande vient d'être validée</strong>
+    ${cart.map(p=>p.name).join(', ')}
+    commandé par ${customer_email}
+    <img width="140" src='https://localfrais.fr/legumes.jpg' />
+    `
+  };
+  sgMail.send(msg);
+}
 
 exports.getSession = async (req, res, next) => {
   const order = req.body;
@@ -38,7 +55,9 @@ exports.getSession = async (req, res, next) => {
       order.shop = shopKey
       order.cart = groupedCart[shopKey]
       order.total_ttc = Number(order.cart.map(c=>c.subtotal).reduce((acc, val) => acc + val) + (order.delivery ? DELIVERY_COST : 0)) * 100;
-      await Order.create(order)
+      await Order.create(order);
+      const foundShop = await Shop.findOne({ _id: shopKey });
+      sendMail(foundShop.email, groupedCart[shopKey], order.name, order.email, order.phone);
     });
     res.json(session)
   })();
