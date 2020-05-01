@@ -3,6 +3,8 @@ const User = require('../user/user.model');
 const Shop = require('../shop/shop.model');
 const ACCEPTABLE_DISTANCE = 8000
 
+const sgMail = require('@sendgrid/mail');
+
 exports.findAll = async (req, res, next) => {
   try {
     const page = parseInt(req.query.page, 10) || 1;
@@ -30,6 +32,35 @@ exports.findById = async (req, res, next) => {
     const order = await Order.findById(req.params.id).lean();
     res.json({ order });
   } catch (error) {
+    res.status(500).json(error);
+  }
+};
+
+const sendMail = (mail, cart = [], name = "", shop) => {
+  sgMail.setApiKey("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");
+  const msg = {
+    to: mail,
+    from: 'contact@localfrais.fr',
+    subject: 'Votre commande est prête.',
+    html: `Bonjour ${name}
+    <strong>Le producteur vient de confirmer qu'il a terminé la préparation de votre commande :</strong>
+    ${cart.map(p=>p.name).join(', ')}
+    <a href="https://localfrais.fr/shop/${shop}">Voir les horaires de la boutique</a>
+    <img width="140" src='https://localfrais.fr/legumes.jpg' />
+    `
+  };
+  sgMail.send(msg);
+}
+
+exports.update = async (req, res, next) => {
+  try {
+    const order = await Order.findByIdAndUpdate(req.params.id, req.body, {new:true});
+    if (order.state === 'ready') {
+      sendMail(order.email, order.cart, order.name, order.shop)
+    }
+    res.json({ order });
+  } catch (error) {
+    console.log(error);
     res.status(500).json(error);
   }
 };

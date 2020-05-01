@@ -18,7 +18,8 @@ const OrderSchema = new Schema({
   cart: Object,
   shop: { type: Schema.ObjectId, ref: 'Shop' },
   session_id: String, // Stripe session id
-  state: String
+  state: String,
+  isPaid: Boolean
 }, { timestamps: true });
 
 OrderSchema.plugin(mongoosePaginate);

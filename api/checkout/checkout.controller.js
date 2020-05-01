@@ -74,7 +74,7 @@ exports.verifySession = async (req, res, next) => {
               if (paymentIntent.status === 'succeeded') {
                 var result = await Order.update(
                   { session_id: session.id },
-                  { state: 'paid', email: session.customer_email },
+                  { state: 'paid', isPaid: true, email: session.customer_email },
                   { multi: true });
                 };
                 res.json(paymentIntent.status)
