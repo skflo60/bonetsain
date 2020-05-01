@@ -2,37 +2,39 @@ const Shop = require('../shop/shop.model');
 const Order = require('../order/order.model');
 const User = require('../user/user.model.js');
 
-const { getDifferentTimes } = require('./time.service')
+const { getDifferentTimes, getTimes } = require('./time.service')
 const moment = require('moment');
 
 exports.findAll = async (req, res, next) => {
   try {
-    let shops = req.query.shops.split(",");
-    let openings = []
-
+    let shopsSet = Array.from(new Set(req.query.shops.split(",")));
+    let foundTimes = []
+    let tmpTimes = []
+    console.log(shopsSet);
     // Shop times
-    for (let i=0; i<shops.length; i++) {
-      const shop = shops[i];
+    for (let i=0; i<shopsSet.length; i++) {
+      const shop = shopsSet[i];
       const foundShop = await Shop.findById(shop, "_id name openings").lean();
-      openings.push(foundShop.openings)
+
+      // Livreur
+      const deliveryMan = await User.findOne({_id: { $in: [req.query.deliverymen]}}).lean();
+
+      // Commandes en cours
+      const orders = await Order.find({ deliveryDate: { $gte: new Date() }});
+      const unavailableTimes = orders ? orders.map(o=>o.selectedTime) : [];
+      const shopTimes = getDifferentTimes(moment(), [foundShop.openings]);
+      const deliveryTimes = getDifferentTimes(moment(), [deliveryMan.availableTimes]);
+      tmpTimes.push(getTimes(shopTimes, deliveryTimes, unavailableTimes))
     }
+    tmpTimes = tmpTimes.sort((a, b) => (a[0].isoDate > b[0].isoDate) ? 1 : -1)
 
-    // Livreur
-    const deliveryMan = await User.findOne({_id: { $in: [req.query.deliverymen]}}).lean();
+    const minTime = tmpTimes[tmpTimes.length - 1][0].isoDate;
 
-    // Commandes en cours
-    const orders = await Order.find({ deliveryDate: { $gte: new Date() }});
-    const unavailableTimes = orders ? orders.map(o=>o.selectedTime) : [];
-    const now = moment()
-
-    const foundTimes = getDifferentTimes(now, openings);
-    const deliveryTimes = getDifferentTimes(now, [deliveryMan.availableTimes]);
-
-    console.log("SHOP", foundTimes);
-    console.log("LIVREUR", deliveryTimes);
-
+    tmpTimes[0] = tmpTimes[0].filter(time => {
+      return moment(time.isoDate).isAfter(moment(minTime))
+    })
     res.status(200).json({
-      times: foundTimes
+      times: tmpTimes[0]
     });
   } catch (error) {
     console.log(error);

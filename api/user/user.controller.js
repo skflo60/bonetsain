@@ -1,6 +1,7 @@
 const bcrypt = require('bcrypt');
 const User = require('./user.model');
 const Shop = require('../shop/shop.model');
+const getWeekNumberFromName = require('../utils/helpers.service')
 const saltRounds = 10;
 
 module.exports = {
@@ -56,7 +57,7 @@ module.exports = {
         if (time.isOpen) {
           const start = time.open.substring(0, 2) + ':' + time.open.substring(2)
           const end = time.close.substring(0, 2) + ':' + time.close.substring(2)
-          user.availableTimes.push({weekday: i, start, end})
+          user.availableTimes.push({weekday: getWeekNumberFromName(day), start, end})
         }
       })
     });

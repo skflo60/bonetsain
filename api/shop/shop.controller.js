@@ -1,4 +1,5 @@
 const Shop = require('./shop.model');
+const getWeekNumberFromName = require('../utils/helpers.service')
 
 exports.findAll = async (req, res, next) => {
   try {
@@ -60,7 +61,7 @@ exports.update = async (req, res, next) => {
         if (time.isOpen) {
           const start = time.open.substring(0, 2) + ':' + time.open.substring(2)
           const end = time.close.substring(0, 2) + ':' + time.close.substring(2)
-          updatedShop.openings.push({weekday: i, start, end})
+          updatedShop.openings.push({weekday: getWeekNumberFromName(day), start, end})
         }
       })
     });

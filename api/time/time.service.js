@@ -39,7 +39,7 @@ const getDifferentTimes = (now = moment(), ressourceTimes = []) => {
   ressourceTimes.forEach(shopTimes => {
     // We have some opening times // ex: 8:00 18:00
     tests = 0;
-    while(foundTimes.length < 20 && tests < 50) {
+    while(foundTimes.length < 100 && tests < 100) {
       tests++
       if (isAnOpeningDay(currentTime.day(), shopTimes)) {
         const shopDayTimes = shopTimes.filter(st=>st.weekday===currentTime.day());
@@ -57,4 +57,18 @@ const getDifferentTimes = (now = moment(), ressourceTimes = []) => {
   return foundTimes;
 }
 
-module.exports = { getDifferentTimes };
+const getTimes = (shopTimes = [], deliveryTimes = [], unavailableTimes = []) => {
+  deliveryTimes = deliveryTimes.filter(dl => {
+    const available = !unavailableTimes.map(ut=>moment(ut).format("YYYY-MM-DD HH:mm")).includes(moment(dl.isoDate).format("YYYY-MM-DD HH:mm"));
+    return moment(dl.isoDate).isAfter(moment(shopTimes[0].isoDate)) && available;
+  });
+  const foundTimes = shopTimes.filter(x => deliveryTimes.map(t=>t.isoDate).includes(x.isoDate));
+
+  if (foundTimes && foundTimes > 0) {
+    return foundTimes;
+  } else {
+    return deliveryTimes;
+  }
+}
+
+module.exports = { getDifferentTimes, getTimes };
