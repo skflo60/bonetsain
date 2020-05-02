@@ -1,9 +1,10 @@
 const Order = require('./order.model');
 const User = require('../user/user.model');
 const Shop = require('../shop/shop.model');
+const moment = require('moment');
 const ACCEPTABLE_DISTANCE = 8000
 
-const sgMail = require('@sendgrid/mail');
+const sendMail = require('../utils/mail.service')
 
 exports.findAll = async (req, res, next) => {
   try {
@@ -16,7 +17,6 @@ exports.findAll = async (req, res, next) => {
       filters,
       { page: page, limit: pagesize, sort: {createdAt: -1} }
     );
-    console.log(filters, orders);
     res.status(200).json({
       orders: orders.docs,
       currentPage: page,
@@ -36,31 +36,28 @@ exports.findById = async (req, res, next) => {
   }
 };
 
-const sendMail = (mail, cart = [], name = "", shop) => {
-  sgMail.setApiKey("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");
-  const msg = {
-    to: mail,
-    from: 'contact@localfrais.fr',
-    subject: 'Votre commande est prête.',
-    html: `Bonjour ${name}
-    <strong>Le producteur vient de confirmer qu'il a terminé la préparation de votre commande :</strong>
-    ${cart.map(p=>p.name).join(', ')}
-    Vous pourrez venir la chercher quand vous le souhaitez sur les horaires d'ouverture :
-    <a href="https://localfrais.fr/shop/${shop}">Voir les horaires du producteur</a>
-    <br />
-    <img width="120" src='https://localfrais.fr/legumes.jpg' />
-    L'équipe Local & Frais
-    `
-  };
-  sgMail.send(msg);
-}
-
 exports.update = async (req, res, next) => {
   try {
     const order = await Order.findByIdAndUpdate(req.params.id, req.body, {new:true});
     if (order.state === 'ready') {
-      if (order.deliveryMan) {
-        sendMail(order.email, order.cart, order.name, order.shop)
+      let content = `<div>Bonjour ${order.name||''}</div>
+      <strong>Le producteur vient de confirmer qu'il a terminé la préparation de votre commande :</strong>
+      <div>${order.cart.map(p=>p.name).join(', ')}</div>
+      <div>Vous pourrez venir la chercher quand vous le souhaitez sur les horaires d'ouverture :</div>
+      <a href="https://localfrais.fr/shop/${order.shop}">Voir les horaires du producteur</a>
+      <br />
+      <img width="100" src='https://localfrais.fr/legumes.jpg' />
+      <div>L'équipe Local & Frais</div>
+      `
+      if (order.email) {
+        sendMail(order.email, order.cart, order, content, subject = 'Votre commande est prête')
+      }
+      if (order.deliveryMan && order.deliveryEmail) {
+        // For delivery man
+        content = content + `
+        <div>Date et heure de livraison souhaitée : ${moment(order.selectedTime).format("dddd DD MMMM YYYY [à] HH[h]mm")}</div>
+        <div><a href="https://maps.google.com/?q=${encodeURIComponent(order.foundAddress.label)}">${order.foundAddress.label || order.address}</div>`
+        sendMail(order.deliveryEmail, order.cart, order, content, subject = 'Une commande est prête à être livrée')
       }
     }
     res.json({ order });

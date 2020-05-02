@@ -1,5 +1,5 @@
 const CONFIG = require('../../config/config')
-const stripe = require('stripe')('sk_test_WkZb6QtYaD3nzlVSxbIFXXhQ00Txor8IU5');
+const stripe = require('stripe')('sk_live_m9FF1SeuHfr7RqLMBv7g6Q0d00J6yuH8YD');
 const Order = require('../order/order.model');
 const Shop = require('../shop/shop.model');
 const User = require('../user/user.model');
@@ -65,7 +65,7 @@ exports.verifySession = async (req, res, next) => {
                 const customer = await stripe.customers.retrieve(session.customer);
                 var result = await Order.update(
                   { session_id: session.id },
-                  { state: 'paid', isPaid: true, email: customer.email },
+                  { state: 'paid', isPaid: true, email: customer.email, name: customer.name },
                   { multi: true });
                 };
                 res.json(paymentIntent.status)

@@ -4,6 +4,7 @@ const User = require('../user/user.model.js');
 
 const { getDifferentTimes, getTimes } = require('./time.service')
 const moment = require('moment');
+moment.locale('fr');
 
 exports.findAll = async (req, res, next) => {
   try {
