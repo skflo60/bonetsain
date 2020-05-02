@@ -37,7 +37,7 @@ exports.findById = async (req, res, next) => {
 };
 
 const sendMail = (mail, cart = [], name = "", shop) => {
-  sgMail.setApiKey("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");
+  sgMail.setApiKey("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");
   const msg = {
     to: mail,
     from: 'contact@localfrais.fr',

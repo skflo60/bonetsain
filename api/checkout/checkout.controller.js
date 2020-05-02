@@ -13,7 +13,7 @@ function groupBy(xs, key) {
 };
 
 const sendMail = (shopMail, cart = [], customer_name = "", customer_email = "", customer_phone = "") => {
-  sgMail.setApiKey("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");
+  sgMail.setApiKey("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");
   const msg = {
     to: shopMail,
     from: 'contact@localfrais.fr',
