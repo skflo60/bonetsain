@@ -18,7 +18,7 @@ const sendMail = async (shopMail, cart = [], order = {}) => {
         ],
         "Subject": "Nouvelle commande !",
         "HTMLPart": `
-        <img width="120" src='https://localfrais.fr/legumes.jpg' />
+        <img width="100" src='https://localfrais.fr/legumes.jpg' /><br />
 <strong>Une nouvelle commande vient d'être validée</strong>
 <div>${cart.map(p=>p.name).join(', ')}<div>
 <div>Commandée par ${order.name||''} ${order.email||''} ${order.phone||''}</div>
