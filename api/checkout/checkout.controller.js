@@ -18,10 +18,11 @@ const sendMail = (shopMail, cart = [], customer_name = "", customer_email = "", 
     to: shopMail,
     from: 'contact@localfrais.fr',
     subject: 'Nouvelle commande !',
-    html: `<strong>Une nouvelle commande vient d'être validée</strong>
-    ${cart.map(p=>p.name).join(', ')}
-    commandé par ${customer_email}
-    <img width="140" src='https://localfrais.fr/legumes.jpg' />
+    html: `
+    <img width="120" src='https://localfrais.fr/legumes.jpg' />
+    <strong>Une nouvelle commande vient d'être validée</strong>
+    <div>${cart.map(p=>p.name).join(', ')}<div>
+    <div>Commandée par ${customer_email}</div>
     `
   };
   sgMail.send(msg);
