@@ -1,5 +1,5 @@
 const CONFIG = require('../../config/config')
-const stripe = require('stripe')('sk_live_m9FF1SeuHfr7RqLMBv7g6Q0d00J6yuH8YD');
+const stripe = require('stripe')(process.env.stripe_key);
 const Order = require('../order/order.model');
 const Shop = require('../shop/shop.model');
 const User = require('../user/user.model');
