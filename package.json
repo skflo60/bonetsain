@@ -9,8 +9,11 @@
     "dev": "node ./bin/www",
     "debug": "ndb npm run dev"
   },
+  "engines" : { "node" : ">=0.12" },
+  "author": "",
+  "license": "MIT",
   "dependencies": {
-    "@sendgrid/mail": "^7.1.0",
+    "@sendgrid/mail": "^7.1.0", 
     "bcrypt": "^3.0.6",
     "body-parser": "^1.18.3",
     "cors": "^2.8.5",
