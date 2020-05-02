@@ -2,8 +2,10 @@ const CONFIG = require('../../config/config')
 const stripe = require('stripe')('sk_test_WkZb6QtYaD3nzlVSxbIFXXhQ00Txor8IU5');
 const Order = require('../order/order.model');
 const Shop = require('../shop/shop.model');
+const User = require('../user/user.model');
 const DELIVERY_COST = 4.9
-const sgMail = require('@sendgrid/mail');
+const mailjet = require('node-mailjet').connect('99a81d385fd2e3a5715357f715c0c2c3', 'f071f86667c981d44961a9958e83d54c')
+const { sendMail } = require('../utils/mail.service')
 
 function groupBy(xs, key) {
   return xs.reduce(function(rv, x) {
@@ -11,22 +13,6 @@ function groupBy(xs, key) {
     return rv;
   }, {});
 };
-
-const sendMail = (shopMail, cart = [], customer_name = "", customer_email = "", customer_phone = "") => {
-  sgMail.setApiKey("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");
-  const msg = {
-    to: shopMail,
-    from: 'contact@localfrais.fr',
-    subject: 'Nouvelle commande !',
-    html: `
-    <img width="120" src='https://localfrais.fr/legumes.jpg' />
-    <strong>Une nouvelle commande vient d'être validée</strong>
-    <div>${cart.map(p=>p.name).join(', ')}<div>
-    <div>Commandée par ${customer_email}</div>
-    `
-  };
-  sgMail.send(msg);
-}
 
 exports.getSession = async (req, res, next) => {
   const order = req.body;
@@ -58,7 +44,10 @@ exports.getSession = async (req, res, next) => {
       order.total_ttc = Number(order.cart.map(c=>c.subtotal).reduce((acc, val) => acc + val) + (order.delivery ? DELIVERY_COST : 0)) * 100;
       await Order.create(order);
       const foundShop = await Shop.findOne({ _id: shopKey });
-      sendMail(foundShop.email, groupedCart[shopKey], order.name, order.email, order.phone);
+      sendMail(foundShop.email, groupedCart[shopKey], order);
+      if (order.selectedTime) {
+        sendMail(order.deliveryEmail, groupedCart[shopKey], order);
+      }
     });
     res.json(session)
   })();
@@ -73,9 +62,10 @@ exports.verifySession = async (req, res, next) => {
           async function(err, paymentIntent) {
             if (paymentIntent) {
               if (paymentIntent.status === 'succeeded') {
+                const customer = await stripe.customers.retrieve(session.customer);
                 var result = await Order.update(
                   { session_id: session.id },
-                  { state: 'paid', isPaid: true, email: session.customer_email },
+                  { state: 'paid', isPaid: true, email: customer.email },
                   { multi: true });
                 };
                 res.json(paymentIntent.status)

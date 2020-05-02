@@ -10,6 +10,7 @@ exports.findAll = async (req, res, next) => {
     let shopsSet = Array.from(new Set(req.query.shops.split(",")));
     let foundTimes = []
     let tmpTimes = []
+    let deliveryMan = {}
     console.log(shopsSet);
     // Shop times
     for (let i=0; i<shopsSet.length; i++) {
@@ -17,13 +18,14 @@ exports.findAll = async (req, res, next) => {
       const foundShop = await Shop.findById(shop, "_id name openings").lean();
 
       // Livreur
-      const deliveryMan = await User.findOne({_id: { $in: [req.query.deliverymen]}}).lean();
+      deliveryMan = await User.findOne({_id: { $in: [req.query.deliverymen]}}).lean();
 
       // Commandes en cours
-      const orders = await Order.find({ deliveryDate: { $gte: new Date() }});
+      const orders = await Order.find({ shop, selectedTime: { $gte: new Date() }});
       const unavailableTimes = orders ? orders.map(o=>o.selectedTime) : [];
       const shopTimes = getDifferentTimes(moment(), [foundShop.openings]);
       const deliveryTimes = getDifferentTimes(moment(), [deliveryMan.availableTimes]);
+      console.log("unavailableTimes1", unavailableTimes);
       tmpTimes.push(getTimes(shopTimes, deliveryTimes, unavailableTimes))
     }
     tmpTimes = tmpTimes.sort((a, b) => (a[0].isoDate > b[0].isoDate) ? 1 : -1)
@@ -34,7 +36,9 @@ exports.findAll = async (req, res, next) => {
       return moment(time.isoDate).isAfter(moment(minTime))
     })
     res.status(200).json({
-      times: tmpTimes[0]
+      times: tmpTimes[0],
+      deliveryMan: deliveryMan._id,
+      deliveryEmail: deliveryMan.email
     });
   } catch (error) {
     console.log(error);

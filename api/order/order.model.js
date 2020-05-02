@@ -17,6 +17,8 @@ const OrderSchema = new Schema({
   deliveryDate: Date,
   cart: Object,
   shop: { type: Schema.ObjectId, ref: 'Shop' },
+  deliveryMan: { type: Schema.ObjectId, ref: 'User' },
+  deliveryEmail: String,
   session_id: String, // Stripe session id
   state: String,
   isPaid: Boolean
