@@ -5,7 +5,7 @@ const Shop = require('../shop/shop.model');
 const User = require('../user/user.model');
 const DELIVERY_COST = 4.9
 const mailjet = require('node-mailjet').connect('99a81d385fd2e3a5715357f715c0c2c3', 'f071f86667c981d44961a9958e83d54c')
-const { sendMail } = require('../utils/mail.service')
+const sendMail = require('../utils/mail.service')
 
 function groupBy(xs, key) {
   return xs.reduce(function(rv, x) {

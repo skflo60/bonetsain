@@ -17,15 +17,20 @@ const sendMail = async (shopMail, cart = [], order = {}) => {
           }
         ],
         "Subject": "Nouvelle commande !",
-        "HTMLPart":
+        "HTMLPart": `
+        <img width="120" src='https://localfrais.fr/legumes.jpg' />
+<strong>Une nouvelle commande vient d'être validée</strong>
+<div>${cart.map(p=>p.name).join(', ')}<div>
+<div>Commandée par ${order.name||''} ${order.email||''} ${order.phone||''}</div>
+${order.delivery?'Date de livraison ' + order.selectedTime:''}`
       }
     ]
-  }) .then((result) => {
-        console.log(result.body);
-    })
-    .catch((err) => {
-        console.log(err, err.statusCode);
-    })
+  }).then((result) => {
+    console.log(result.body);
+  })
+  .catch((err) => {
+    console.log(err, err.statusCode);
+  })
 };
 
 module.exports = sendMail;
