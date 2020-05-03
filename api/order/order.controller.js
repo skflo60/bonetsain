@@ -47,17 +47,15 @@ exports.update = async (req, res, next) => {
       <a href="https://localfrais.fr/shop/${order.shop}">Voir les horaires du producteur</a>
       <br />
       <img width="100" src='https://localfrais.fr/legumes.jpg' />
-      <div>L'équipe Local & Frais</div>
-      `
-      if (order.email) {
-        sendMail(order.email, order.cart, order, content, subject = 'Votre commande est prête')
-      }
+      <div>L'équipe Local & Frais</div>`
       if (order.deliveryMan && order.deliveryEmail) {
         // For delivery man
         content = content + `
         <div>Date et heure de livraison souhaitée : ${moment(order.selectedTime).format("dddd DD MMMM YYYY [à] HH[h]mm")}</div>
         <div><a href="https://maps.google.com/?q=${encodeURIComponent(order.foundAddress.label)}">${order.foundAddress.label || order.address}</div>`
         sendMail(order.deliveryEmail, order.cart, order, content, subject = 'Une commande est prête à être livrée')
+      } else {
+        sendMail(order.email, order.cart, order, content, subject = 'Votre commande est prête')
       }
     }
     res.json({ order });
