@@ -47,7 +47,7 @@ exports.getSession = async (req, res, next) => {
       order.total_ttc = amount / 100;
       order.total_net = total_brut * 0.96
       await Order.create(order);
-      order.cart.forEach(product => {
+      order.cart.forEach(async product => {
         // TODO double check product price
         if (product.stock) {
           product.stock=product.stock-1
