@@ -90,7 +90,8 @@ module.exports = {
         const user = new User({
           username,
           password: hash,
-          shop: persistedShop._id
+          shop: persistedShop._id,
+          location: validatedAddress.geometry
         });
 
         const persistedUser = await user.save();
