@@ -70,7 +70,7 @@ module.exports = {
   },
   signup: async (req, res, next) => {
     try {
-      const { username, password, name, validatedAddress } = req.body;
+      const { username, password, email, name, validatedAddress } = req.body;
       const hash = await bcrypt.hash(password, saltRounds);
 
       const user = await User.findOne({ username });
@@ -78,6 +78,7 @@ module.exports = {
       if (!user) {
         const shop = new Shop({
           name,
+          email,
           address: validatedAddress.properties.name,
           postalCode: validatedAddress.properties.postcode,
           city: validatedAddress.properties.city,

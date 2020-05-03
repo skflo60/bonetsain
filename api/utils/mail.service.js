@@ -1,41 +1,34 @@
-const mailjet = require('node-mailjet').connect('99a81d385fd2e3a5715357f715c0c2c3', 'f071f86667c981d44961a9958e83d54c')
+"use strict";
+const nodemailer = require("nodemailer");
 
-const sendMail = async (shopMail, cart = [], order = {}, content = null, subject = 'Nouvelle commande !') => {
+// async..await is not allowed in global scope, must use a wrapper
+async function sendMail(shopMail, cart = [], order = {}, content = null, subject = 'Nouvelle commande !') {
   const htmlContent = content || `
   <img width="100" src='https://localfrais.fr/legumes.jpg' /><br />
   <strong>Une nouvelle commande vient d'être validée</strong>
   <div>${cart.map(p=>p.name).join(', ')}<div>
   <div>Commandée par ${order.name||''} ${order.email||''} ${order.phone||''}</div>
   ${order.delivery?'Date de livraison ' + order.selectedTime:''}`
-  try {
-    const request = mailjet
-    .post("send", {'version': 'v3.1'})
-    .request({
-      "Messages":[
-        {
-          "From": {
-            "Email": "contact@localfrais.fr",
-            "Name": "Florian de Local&Frais"
-          },
-          "To": [
-            {
-              "Email": shopMail,
-              "Name": order.name
-            }
-          ],
-          "Subject": subject,
-          "HTMLPart": htmlContent
-        }
-      ]
-    }).then((result) => {
-      console.log(result.body);
-    })
-    .catch((err) => {
-      console.log(err, err.statusCode);
-    })
-  } catch(e) {
-    console.log(e)
-  }
-};
+  // create reusable transporter object using the default SMTP transport
+  let transporter = nodemailer.createTransport({
+    host: "mail42.lwspanel.com",
+    port: 587,
+    auth: {
+      user: "contact@localfrais.fr",
+      pass: process.env.mail_pwd
+    }
+  });
+
+  // send mail with defined transport object
+  let info = await transporter.sendMail({
+    from: '"Florian de Local & Frais 🥕" <contact@localfrais.fr>', // sender address
+    to: shopMail, // list of receivers
+    subject, // Subject line
+    html: htmlContent
+  });
+
+  console.log("Message sent: %s", info.messageId);
+  // Message sent: <b658f8ca-6296-ccf4-8306-87d57a0b4321@example.com>
+}
 
 module.exports = sendMail;

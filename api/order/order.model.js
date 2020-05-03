@@ -21,7 +21,9 @@ const OrderSchema = new Schema({
   deliveryEmail: String,
   session_id: String, // Stripe session id
   state: String,
-  isPaid: Boolean
+  isPaid: Boolean,
+  total_ttc: Number,
+  total_net: Number
 }, { timestamps: true });
 
 OrderSchema.plugin(mongoosePaginate);

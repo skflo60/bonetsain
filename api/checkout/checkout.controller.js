@@ -1,10 +1,9 @@
 const CONFIG = require('../../config/config')
-const stripe = require('stripe')('sk_test_WkZb6QtYaD3nzlVSxbIFXXhQ00Txor8IU5');
+const Stripe = require('stripe');
 const Order = require('../order/order.model');
 const Shop = require('../shop/shop.model');
 const User = require('../user/user.model');
 const DELIVERY_COST = 4.9
-const mailjet = require('node-mailjet').connect('99a81d385fd2e3a5715357f715c0c2c3', 'f071f86667c981d44961a9958e83d54c')
 const sendMail = require('../utils/mail.service')
 
 function groupBy(xs, key) {
@@ -18,9 +17,13 @@ exports.getSession = async (req, res, next) => {
   const order = req.body;
   const cart = order.cart || [];
   const groupedCart = groupBy(order.cart, 'shop');
-  const shops = Object.keys(groupedCart)
-  const amount = Math.round(Number(cart.map(c=>c.subtotal).reduce((acc, val) => acc + val) + (order.delivery ? DELIVERY_COST * shops.length : 0)) * 100);
+  const shops = Object.keys(groupedCart);
+  const total_brut = Math.round(Number(cart.map(c=>c.subtotal).reduce((acc, val) => acc + val)));
+  const amount = (total_brut + (order.delivery ? DELIVERY_COST * shops.length : 0))*100;
+  const test = shops[0] === '5e1e38a41c9d44000073a0a8';
   (async () => {
+    const stripe_key = test ? 'sk_test_WkZb6QtYaD3nzlVSxbIFXXhQ00Txor8IU5' : process.env.stripe_key;
+    const stripe = new Stripe(stripe_key);
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       customer_email: order.email,
@@ -32,7 +35,7 @@ exports.getSession = async (req, res, next) => {
         currency: 'eur',
         quantity: 1,
       }],
-      success_url:'https://localfrais.fr/payment?session_id={CHECKOUT_SESSION_ID}',
+      success_url: `https://localfrais.fr/payment?session_id={CHECKOUT_SESSION_ID}${(test ? '&test=true' : '')}`,
       cancel_url: 'https://localfrais.fr/payment?session_id=null',
     });
     order.session_id = session.id
@@ -41,8 +44,16 @@ exports.getSession = async (req, res, next) => {
     shops.forEach(async shopKey => {
       order.shop = shopKey
       order.cart = groupedCart[shopKey]
-      order.total_ttc = Number(order.cart.map(c=>c.subtotal).reduce((acc, val) => acc + val) + (order.delivery ? DELIVERY_COST : 0)) * 100;
+      order.total_ttc = amount / 100;
+      order.total_net = total_brut * 0.96
       await Order.create(order);
+      order.cart.forEach(product => {
+        // TODO double check product price
+        if (product.stock) {
+          product.stock=product.stock-1
+          await Product.findByIdAndUpdate(product.id, { stock: product.stock });
+        }
+      });
       const foundShop = await Shop.findOne({ _id: shopKey });
       sendMail(foundShop.email, groupedCart[shopKey], order);
       if (order.selectedTime) {
@@ -57,6 +68,7 @@ exports.verifySession = async (req, res, next) => {
   await stripe.checkout.sessions.retrieve(req.params.uid,
     function(err, session) {
       if (session) {
+        const stripe = new Stripe(req.query.test ? "sk_test_WkZb6QtYaD3nzlVSxbIFXXhQ00Txor8IU5" : process.env.stripe_key);
         stripe.paymentIntents.retrieve(
           session.payment_intent,
           async function(err, paymentIntent) {
@@ -68,6 +80,7 @@ exports.verifySession = async (req, res, next) => {
                   { state: 'paid', isPaid: true, email: customer.email, name: customer.name },
                   { multi: true });
                 };
+                console.log(result)
                 res.json(paymentIntent.status)
               } else {
                 res.json(err)
