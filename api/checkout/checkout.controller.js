@@ -18,7 +18,7 @@ exports.getSession = async (req, res, next) => {
   const cart = order.cart || [];
   const groupedCart = groupBy(order.cart, 'shop');
   const shops = Object.keys(groupedCart);
-  const total_brut = Math.round(Number(cart.map(c=>c.subtotal).reduce((acc, val) => acc + val)));
+  const total_brut = Number(cart.map(c=>c.subtotal).reduce((acc, val) => acc + val).toFixed(2));
   const amount = (total_brut + (order.delivery ? DELIVERY_COST * shops.length : 0))*100;
   const test = shops[0] === '5e1e38a41c9d44000073a0a8';
   (async () => {
@@ -55,9 +55,11 @@ exports.getSession = async (req, res, next) => {
         }
       });
       const foundShop = await Shop.findOne({ _id: shopKey });
+      // Mail for producteur
       sendMail(foundShop.email, groupedCart[shopKey], order);
       if (order.selectedTime) {
-        sendMail(order.deliveryEmail, groupedCart[shopKey], order);
+        // Mail for delivery man
+        sendMail(order.deliveryEmail, groupedCart[shopKey], order, null, 'Commande à livrer');
       }
     });
     res.json(session)
@@ -80,7 +82,8 @@ exports.verifySession = async (req, res, next) => {
                   { state: 'paid', isPaid: true, email: customer.email, name: customer.name },
                   { multi: true });
                 };
-                console.log(result)
+                // Mail for buyer with order link
+                sendMail(order.email, groupedCart[shopKey], order, null, "Votre commande a été envoyée au producteur");
                 res.json(paymentIntent.status)
               } else {
                 res.json(err)

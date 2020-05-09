@@ -1,4 +1,5 @@
 const moment = require('moment');
+const getDayNumberFromName = require('../utils/helpers.service');
 
 const parseTime = (time) => {
   return time.split(":");
@@ -71,4 +72,25 @@ const getTimes = (shopTimes = [], deliveryTimes = [], unavailableTimes = []) => 
   }
 }
 
-module.exports = { getDifferentTimes, getTimes };
+const isShopOpen = (shopDays = {}, now = new Date()) => {
+  let isOpen = false
+  Object.keys(shopDays).forEach(day => {
+    const openingDay = getDayNumberFromName(day);
+    const currentDay = now.getDay();
+    if (currentDay === openingDay) {
+      var currentTime = moment(moment(now).format('HH:mm'), 'HH:mm');
+      shopDays[day].forEach(time => {
+        if (time.isOpen) {
+          var beforeTime = moment(time.open.substring(0, 2) + 'h' + time.open.substring(2), 'HH:mm'); // 0800
+          var afterTime = moment(time.close.substring(0, 2) + 'h' + time.close.substring(2), 'HH:mm'); // 1800
+          if (currentTime.isBetween(beforeTime, afterTime)) {
+            isOpen = true
+          }
+        }
+      })
+    }
+  });
+  return isOpen;
+}
+
+module.exports = { getDifferentTimes, getTimes, isShopOpen };

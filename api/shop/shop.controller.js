@@ -1,5 +1,6 @@
 const Shop = require('./shop.model');
-const getWeekNumberFromName = require('../utils/helpers.service')
+const getDayNumberFromName = require('../utils/helpers.service')
+const { isShopOpen } = require('../time/time.service')
 
 exports.findAll = async (req, res, next) => {
   try {
@@ -45,7 +46,7 @@ exports.findRelated = async (req, res, next) => {
 exports.findById = async (req, res, next) => {
   try {
     const shop = await Shop.findById(req.params.id).lean();
-    // Todo is Open
+    shop.isOpen = isShopOpen(shop.days);
     res.json({ shop });
   } catch (error) {
     res.status(500).json(error);
@@ -61,7 +62,7 @@ exports.update = async (req, res, next) => {
         if (time.isOpen) {
           const start = time.open.substring(0, 2) + ':' + time.open.substring(2)
           const end = time.close.substring(0, 2) + ':' + time.close.substring(2)
-          updatedShop.openings.push({weekday: getWeekNumberFromName(day), start, end})
+          updatedShop.openings.push({weekday: getDayNumberFromName(day), start, end})
         }
       })
     });

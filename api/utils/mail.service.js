@@ -7,7 +7,7 @@ async function sendMail(shopMail, cart = [], order = {}, content = null, subject
   <img width="100" src='https://localfrais.fr/legumes.jpg' /><br />
   <strong>Une nouvelle commande vient d'être validée</strong>
   <div>${cart.map(p=>p.name).join(', ')}<div>
-  <div>Commandée par ${order.name||''} ${order.email||''} ${order.phone||''}</div>
+  <div><a href="https://localfrais.fr/order/${order._id}">Lien vers la commande</a></div>
   ${order.delivery?'Date de livraison ' + order.selectedTime:''}`
   // create reusable transporter object using the default SMTP transport
   let transporter = nodemailer.createTransport({

@@ -1,4 +1,4 @@
-const getWeekNumberFromName = (name) => {
+const getDayNumberFromName = (name) => {
   switch (name) {
     case 'sunday':
       return 0
@@ -24,4 +24,4 @@ const getWeekNumberFromName = (name) => {
   }
 }
 
-module.exports = getWeekNumberFromName;
+module.exports = getDayNumberFromName;
