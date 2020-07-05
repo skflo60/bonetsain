@@ -78,11 +78,12 @@ const isShopOpen = (shopDays = {}, now = new Date()) => {
     const openingDay = getDayNumberFromName(day);
     const currentDay = now.getDay();
     if (currentDay === openingDay) {
-      var currentTime = moment(moment(now).format('HH:mm'), 'HH:mm');
+      var currentTime = moment(moment(now).utc().format('HH:mm'), 'HH:mm');
       shopDays[day].forEach(time => {
         if (time.isOpen) {
-          var beforeTime = moment(time.open.substring(0, 2) + 'h' + time.open.substring(2), 'HH:mm'); // 0800
-          var afterTime = moment(time.close.substring(0, 2) + 'h' + time.close.substring(2), 'HH:mm'); // 1800
+          console.log(currentTime, beforeTime, afterTime);
+          var beforeTime = moment(time.open.substring(0, 2) + ':' + time.open.substring(2), 'HH:mm').utc(); // 0800
+          var afterTime = moment(time.close.substring(0, 2) + ':' + time.close.substring(2), 'HH:mm').utc(); // 1800
           if (currentTime.isBetween(beforeTime, afterTime)) {
             isOpen = true
           }

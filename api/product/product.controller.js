@@ -11,10 +11,16 @@ exports.findAll = async (req, res, next) => {
       filters = { months: parseInt(month, 10) }
     }
     filters.shop = new mongoose.Types.ObjectId(req.query.shop)
+
+    if (req.query.category) {
+      filters.category = new mongoose.Types.ObjectId(req.query.category)
+    }
+
     const products = await Product.paginate(
       filters,
       { page: page, limit: pagesize }
     );
+    console.log("Applied filters", filters);
     res.status(200).json({
       products: products.docs,
       currentPage: page,
