@@ -1,6 +1,7 @@
 const Shop = require('./shop.model');
 const getDayNumberFromName = require('../utils/helpers.service')
 const { isShopOpen } = require('../time/time.service')
+const mongoose = require('mongoose');
 
 exports.findAll = async (req, res, next) => {
   try {
@@ -20,6 +21,34 @@ exports.findAll = async (req, res, next) => {
       shops = await Shop.find()
     }
     res.status(200).json({shops});
+  } catch (error) {
+    console.log(error)
+    res.status(500).json(error);
+  }
+};
+
+exports.findProducers = async (req, res, next) => {
+  try {
+    let producers = [];
+    const filters = {};
+    if (req.params.id) {
+      filters.affiliatedShop = new mongoose.Types.ObjectId(req.params.id)
+    }
+    producers = await Shop.find(filters);
+    console.log(filters, producers);
+    res.status(200).json({producers});
+  } catch (error) {
+    console.log(error)
+    res.status(500).json(error);
+  }
+};
+
+exports.createProducer = async (req, res, next) => {
+  try {
+    const createdProducer = req.body;
+    console.log('creating producer', createdProducer);
+    const producer = await Shop.create(createdProducer);
+    res.json(producer)
   } catch (error) {
     console.log(error)
     res.status(500).json(error);
@@ -49,6 +78,17 @@ exports.findById = async (req, res, next) => {
     shop.isOpen = isShopOpen(shop.days);
     res.json({ shop });
   } catch (error) {
+    res.status(500).json(error);
+  }
+};
+
+exports.updateProducer = async (req, res, next) => {
+  try {
+    const updatedShop = req.body;
+    const shop = await Shop.update({_id: updatedShop._id}, updatedShop);
+    res.json(updatedShop)
+  } catch (error) {
+    console.log(error)
     res.status(500).json(error);
   }
 };

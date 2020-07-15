@@ -18,7 +18,7 @@ exports.findAll = async (req, res, next) => {
 
     const products = await Product.paginate(
       filters,
-      { page: page, limit: pagesize }
+      { page: page, limit: pagesize, populate: 'producer' }
     );
     console.log("Applied filters", filters);
     res.status(200).json({
@@ -50,7 +50,7 @@ exports.findRelated = async (req, res, next) => {
 
 exports.findById = async (req, res, next) => {
   try {
-    const product = await Product.findById(req.params.id).populate('category').lean();
+    const product = await Product.findById(req.params.id).lean();
     res.json({ product });
   } catch (error) {
     res.status(500).json(error);
