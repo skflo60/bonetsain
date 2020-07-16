@@ -33,7 +33,7 @@ exports.findAll = async (req, res, next) => {
 
 exports.findRelated = async (req, res, next) => {
   try {
-    const product = await Product.findById(req.params.id).populate("shop").lean();
+    const product = await Product.findById(req.params.id).populate("shop").populate("producer").lean();
     const productSize = 3;
     const products = await Product.aggregate([
       { $match: { category: product.category, shop: product.shop._id } },

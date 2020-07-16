@@ -23,7 +23,7 @@ exports.findAll = async (req, res, next) => {
 
       // Commandes en cours
       const orders = await Order.find({ shop, selectedTime: { $gte: new Date() }});
-      const unavailableTimes = orders ? orders.map(o=>o.selectedTime) : [];
+      const unavailableTimes = []; // TODO limit to x orders by times // orders ? orders.map(o=>o.selectedTime) : [];
       const shopTimes = getDifferentTimes(moment(), [foundShop.openings]);
       const deliveryTimes = getDifferentTimes(moment(), [deliveryMan.availableTimes]);
       console.log("unavailableTimes1", unavailableTimes);

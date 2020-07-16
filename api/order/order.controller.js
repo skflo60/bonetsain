@@ -2,7 +2,7 @@ const Order = require('./order.model');
 const User = require('../user/user.model');
 const Shop = require('../shop/shop.model');
 const moment = require('moment');
-const ACCEPTABLE_DISTANCE = 8000
+const ACCEPTABLE_DISTANCE = 15000
 
 const sendMail = require('../utils/mail.service')
 

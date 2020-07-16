@@ -7,6 +7,10 @@ exports.findAll = async (req, res, next) => {
   try {
     let filters = {}
     let shops = []
+
+    if (req.query.onlyFarmers==='true') {
+      filters.affiliatedShop = { $ne: null };
+    }
     if (req.query.lat && req.query.lng) {
       let lat = parseFloat(req.query.lat)
       let lng = parseFloat(req.query.lng)
@@ -14,11 +18,12 @@ exports.findAll = async (req, res, next) => {
         $geoNear: {
           near: { type: "Point", coordinates: [ lng, lat ] },
           key: "location",
+          query: filters,
           distanceField: "dist.calculated"
         }
       }])
     } else {
-      shops = await Shop.find()
+      shops = await Shop.find(filters)
     }
     res.status(200).json({shops});
   } catch (error) {
