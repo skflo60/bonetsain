@@ -8,6 +8,7 @@ const ProductSchema = new Schema({
   quantity: Number,
   unit: String,
   stock: Number,
+  weight: Number,
   category: { type: Schema.ObjectId, ref: 'Category' },
   producer: { type: Schema.ObjectId, ref: 'Shop' },
   image: String,

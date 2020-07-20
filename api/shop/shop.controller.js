@@ -119,3 +119,14 @@ exports.update = async (req, res, next) => {
     res.status(500).json(error);
   }
 };
+
+exports.removeProducer = async (req, res, next) => {
+  try {
+    const id = req.params.id;
+    const product = await Shop.deleteOne({ _id: id });
+    res.json(product)
+  } catch (error) {
+    console.log(error);
+    res.status(500).json(error);
+  }
+};
