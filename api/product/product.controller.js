@@ -12,8 +12,14 @@ exports.findAll = async (req, res, next) => {
     }
     filters.shop = new mongoose.Types.ObjectId(req.query.shop)
 
+    // Filter category
     if (req.query.category) {
       filters.category = new mongoose.Types.ObjectId(req.query.category)
+    }
+
+    // Filter producer
+    if (req.query.producer) {
+      filters.producer = new mongoose.Types.ObjectId(req.query.producer)
     }
 
     const products = await Product.paginate(
