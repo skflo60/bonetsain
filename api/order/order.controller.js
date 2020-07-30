@@ -75,6 +75,7 @@ exports.isDeliveryPossible = async (req, res, next) => {
         near: { type: "Point", coordinates: [ lng, lat ] },
         key: "location",
         maxDistance: ACCEPTABLE_DISTANCE,
+        minDistance: 1,
         query: { type: 'deliveryman' },
         distanceField: "dist.calculated"
       }
@@ -88,7 +89,7 @@ exports.isDeliveryPossible = async (req, res, next) => {
         distanceField: "dist.calculated"
       }
     }])
-    var deliveryMen = deliveryMenNearShop.filter(n => !deliveryMenNearUser.some(n2 => n._id == n2._id));
+    var deliveryMen = deliveryMenNearUser.filter(n => !deliveryMenNearShop.some(n2 => n._id == n2._id));
     res.json({ result: deliveryMen.length, deliveryMen });
   } catch (error) {
     console.log(error)
