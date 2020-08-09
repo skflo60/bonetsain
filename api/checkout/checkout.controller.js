@@ -36,7 +36,7 @@ exports.getSession = async (req, res, next) => {
         quantity: 1,
       }],
       success_url: `https://localfrais.fr/payment?session_id={CHECKOUT_SESSION_ID}${(test ? '&test=true' : '')}`,
-      cancel_url: 'https://localfrais.fr/payment?session_id=null',
+      cancel_url: 'https://localfrais.fr/checkout',
     });
     order.session_id = session.id
     order.state = 'waiting'
@@ -46,7 +46,7 @@ exports.getSession = async (req, res, next) => {
       order.cart = groupedCart[shopKey]
       order.total_ttc = amount / 100;
       order.total_net = (total_brut * 0.96) - 0.30
-      await Order.create(order);
+      const createdOrder = await Order.create(order);
       order.cart.forEach(async product => {
         // TODO double check product price
         if (product.stock) {
@@ -56,10 +56,10 @@ exports.getSession = async (req, res, next) => {
       });
       const foundShop = await Shop.findOne({ _id: shopKey });
       // Mail for producteur
-      sendMail(foundShop.email, groupedCart[shopKey], order);
+      sendMail(foundShop.email, groupedCart[shopKey], createdOrder);
       if (order.selectedTime) {
         // Mail for delivery man
-        sendMail(order.deliveryEmail, groupedCart[shopKey], order, null, 'Commande à livrer');
+        sendMail(order.deliveryEmail, groupedCart[shopKey], createdOrder, null, 'Commande à livrer');
       }
     });
     res.json(session)
@@ -83,7 +83,7 @@ exports.verifySession = async (req, res, next) => {
                   { multi: true });
                 };
                 // Mail for buyer with order link
-                sendMail(order.email, groupedCart[shopKey], order, null, "Votre commande a été envoyée au producteur");
+                sendMail(order.email, groupedCart[shopKey], result, null, "Votre commande a été validée, vous serez informé 1h avant la livraison");
                 res.json(paymentIntent.status)
               } else {
                 res.json(err)
