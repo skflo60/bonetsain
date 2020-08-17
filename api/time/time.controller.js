@@ -27,7 +27,8 @@ exports.findAll = async (req, res, next) => {
     '2020-08-25 18:00', '2020-08-25 19:00', '2020-08-25 20:00', '2020-08-25 21:00',
   '2020-08-29 08:00', '2020-08-29 09:00',
 '2020-09-01 18:00', '2020-09-01 19:00', '2020-09-01 20:00', '2020-09-01 21:00',
-'2020-09-05 08:00', '2020-09-05 09:00']; // TODO limit to x orders by times // orders ? orders.map(o=>o.selectedTime) : [];
+'2020-09-05 08:00', '2020-09-05 09:00',
+'2020-09-08 18:00', '2020-09-08 19:00', '2020-09-08 20:00', '2020-09-08 21:00']; // TODO limit to x orders by times // orders ? orders.map(o=>o.selectedTime) : [];
       const shopTimes = getDifferentTimes(moment(), [foundShop.openings]);
       const deliveryTimes = getDifferentTimes(moment(), [deliveryMan.availableTimes]);
       console.log("unavailableTimes1", unavailableTimes);

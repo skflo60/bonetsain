@@ -40,7 +40,7 @@ const getDifferentTimes = (now = moment(), ressourceTimes = []) => {
   ressourceTimes.forEach(shopTimes => {
     // We have some opening times // ex: 8:00 18:00
     tests = 0;
-    while(foundTimes.length < 150 && tests < 150) {
+    while(foundTimes.length < 170 && tests < 170) {
       tests++
       if (isAnOpeningDay(currentTime.day(), shopTimes)) {
         const shopDayTimes = shopTimes.filter(st=>st.weekday===currentTime.day());
