@@ -1,5 +1,8 @@
 const mongoose = require('mongoose');
 const Product = require('./product.model');
+const Shop = require('../shop/shop.model');
+const request = require('superagent');
+const cheerio = require('cheerio');
 
 exports.findAll = async (req, res, next) => {
   try {
@@ -26,13 +29,63 @@ exports.findAll = async (req, res, next) => {
       filters,
       { page: page, limit: pagesize, populate: 'producer' }
     );
-    console.log("Applied filters", filters);
+
     res.status(200).json({
       products: products.docs,
       currentPage: page,
       pages: products.pages
     });
   } catch (error) {
+    res.status(500).json(error);
+  }
+};
+
+function jsUcfirst(string) 
+{
+    return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
+async function asyncForEach(array, callback) {
+  for (let index = 0; index < array.length; index++) {
+    await callback(array[index], index, array);
+  }
+}
+
+exports.findAllFromDrive = async (req, res, next) => {
+  try {
+   request
+  .get('https://drivefermier-somme.fr/amiens/fruits-et-legumes/')
+  .withCredentials()
+  .then(async result => {
+    var $ = cheerio.load(result.text);
+    var products = [];
+    // For Each Drive product
+    $('form').each(function (i, elem) {
+        if ($(this).find('.product-title').text().trim() !== '') {
+          products.push({
+            name: $(this).find('.product-title').text().trim(),
+            price: +($(this).find('.ty-price-num').text().trim().replace('€', '').replace(',', '.')),
+            category: "5cd9d2e91c9d440000a9b251",
+            shop: "5ed2794fcb7cfe00177a14fa",
+            image: $(this).find('img').attr('src'),
+            producerName: $(this).find('.company-name').text().trim(),
+            description: $(this).find('.product-list-unit-price').text().trim() + `
+            `+ $(this).find('.company-name').text().trim()
+          })
+        }
+    });
+
+    await asyncForEach(products, async product => {
+      let producerName = jsUcfirst(product.producerName);
+      const producer = await Shop.findOne({ name: producerName }).lean();
+      product.producer = producer;
+    });
+
+    // Return Drive products
+    res.status(200).json({ products });
+  })
+  } catch (error) {
+    console.log(error);
     res.status(500).json(error);
   }
 };
@@ -50,9 +103,12 @@ exports.findRelated = async (req, res, next) => {
       success: true
     });
   } catch (error) {
+    console.log(error);
     res.status(500).json(error);
   }
 };
+
+
 
 exports.findById = async (req, res, next) => {
   try {

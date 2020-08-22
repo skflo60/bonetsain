@@ -3,6 +3,7 @@ const router = express.Router();
 const productController = require('./product.controller');
 
 router.route('/').get(productController.findAll);
+router.route('/drive/').get(productController.findAllFromDrive);
 router.route('/:id').get(productController.findById);
 router.route('/:id/related').get(productController.findRelated);
 router.route('/:id').delete(productController.remove);

@@ -37,7 +37,7 @@ exports.findAll = async (req, res, next) => {
     }
     tmpTimes = tmpTimes.sort((a, b) => (a[0].isoDate > b[0].isoDate) ? 1 : -1)
 
-    const minTime = tmpTimes[tmpTimes.length - 1][0].isoDate;
+    const minTime = tmpTimes[tmpTimes.length - 1][0] ? tmpTimes[tmpTimes.length - 1][0].isoDate : null;
 
     tmpTimes[0] = tmpTimes[0].filter(time => {
       return moment(time.isoDate).isAfter(moment(minTime))
