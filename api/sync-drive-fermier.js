@@ -31,7 +31,7 @@ const mapProduct = (domElement) => {
 const syncDriveFermier = async () => {
 try {
 	// TODO Delete old products
-  await Shop.deleteMany({ fromDrive: true });
+  // await Shop.deleteMany({ fromDrive: true });
   await Product.deleteMany({ fromDrive: true });
 	console.log("1/4 -> Getting products");
    request
