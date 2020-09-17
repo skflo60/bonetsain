@@ -46,7 +46,7 @@ try {
     // For Each Drive product
     $('.bloc_produit').each(function (i, elem) {
         if ($(elem).text().trim() !== '') {
-          if (/lait|fromage|chèvre/.test($(elem).find(".nom").text().toLowerCase())) {
+          if (/lait |fromage|chèvre/.test($(elem).find(".nom").text().toLowerCase())) {
             products.push(mapProduct($(elem)));
           }
         }
