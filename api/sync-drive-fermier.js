@@ -65,7 +65,6 @@ try {
 		});
 		console.log("3/4 -> Upserting product", product);
     });
-
     console.log("4/4 -> FINISH SUCCESS");
     // Return Sync Success
    return true
