@@ -18,13 +18,13 @@ async function asyncForEach(array, callback) {
 const mapProduct = (domElement) => {
 	return {
             name: domElement.find('.product-title').text().trim(),
-            price: +(domElement.find('.ty-price-num').text().trim().replace('€', '').replace(',', '.')),
+            price: Math.round((+(domElement.find('.ty-price-num').text().trim().replace('€', '').replace(',', '.')) * 1.2 + Number.EPSILON) * 10) / 10,
             category: "5cd9d2e91c9d440000a9b251",
             shop: "5ed2794fcb7cfe00177a14fa",
             image: domElement.find('img').attr('src'),
             producerName: domElement.find('.company-name').text().trim(),
             fromDrive: true,
-            description: domElement.find('.product-list-unit-price').text().trim()
+            description: ''
           };
 }
 

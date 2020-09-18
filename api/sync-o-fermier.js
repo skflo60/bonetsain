@@ -35,7 +35,7 @@ const mapProduct = (domElement, category = "5f037fd2ceceb9b99d12ef44") => {
 const syncOFermier = async () => {
 try {
 	await Product.deleteMany({ fromBox: true });
-	console.log("1/4 -> Getting products");
+	/*console.log("1/4 -> Getting products");
    request
   .get('https://clients.filbingbox.fr/stock/29/O-Panier-Fermier/')
   .withCredentials()
@@ -72,7 +72,7 @@ try {
     console.log("4/4 -> FINISH SUCCESS");
     // Return Sync Success
    return true
-  })
+  })*/
   } catch (error) {
     console.log(error);
     return false
