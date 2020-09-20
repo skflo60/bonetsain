@@ -7,7 +7,7 @@ const cheerio = require('cheerio');
 exports.findAll = async (req, res, next) => {
   try {
     const page = parseInt(req.query.page, 10) || 1;
-    const pagesize = parseInt(req.query.pagesize) || 100;
+    const pagesize = parseInt(req.query.pagesize) || 200;
     const month = req.query.month
     let filters = {}
     if (month) {
