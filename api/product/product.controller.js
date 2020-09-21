@@ -25,6 +25,11 @@ exports.findAll = async (req, res, next) => {
       filters.producer = new mongoose.Types.ObjectId(req.query.producer)
     }
 
+    // Filter producer
+    if (req.query.search) {
+      filters.name = { $regex : new RegExp(req.query.search, "i") };
+    }
+
     const products = await Product.paginate(
       filters,
       { page: page, limit: pagesize, populate: 'producer' }

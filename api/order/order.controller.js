@@ -1,7 +1,10 @@
+const Stripe = require('stripe');
+
 const Order = require('./order.model');
 const User = require('../user/user.model');
 const Shop = require('../shop/shop.model');
 const moment = require('moment');
+
 const ACCEPTABLE_DISTANCE = 15000
 
 const sendMail = require('../utils/mail.service')
@@ -34,6 +37,52 @@ exports.findById = async (req, res, next) => {
   } catch (error) {
     res.status(500).json(error);
   }
+};
+
+exports.validate = async (req, res, next) => {
+  const sig = request.headers['stripe-signature'];
+  const body = request.body;
+
+  let event = null;
+
+  const stripe_key = process.env.stripe_key;
+  const stripe = new Stripe(stripe_key);
+
+  try {
+    event = stripe.webhooks.constructEvent(request.body, sig, stripe_key);
+  } catch (err) {
+    // invalid signature
+    response.status(400).end();
+    return;
+  }
+
+  let intent = null;
+  switch (event['type']) {
+    case 'payment_intent.succeeded':
+      intent = event.data.object;
+      // TODO set order to paid
+      console.log("Succeeded:", intent.id);
+      stripe.paymentIntents.retrieve(
+          intent.id,
+          async function(err, paymentIntent) {
+            if (paymentIntent) {
+                const customer = await stripe.customers.retrieve(session.customer);
+                var result = await Order.update(
+                  { session_id: session.id },
+                  { state: 'paid', isPaid: true, email: customer.email, name: customer.name },
+                  { multi: true });
+                };
+              }
+          );
+      break;
+    case 'payment_intent.payment_failed':
+      intent = event.data.object;
+      const message = intent.last_payment_error && intent.last_payment_error.message;
+      console.log('Failed:', intent.id, message);
+      break;
+  }
+
+  response.sendStatus(200);
 };
 
 exports.update = async (req, res, next) => {

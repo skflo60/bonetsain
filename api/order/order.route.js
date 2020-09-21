@@ -6,5 +6,6 @@ router.route('/').get(orderController.findAll);
 router.route('/:id').patch(orderController.update);
 router.route('/:id').get(orderController.findById);
 router.route('/delivery/approval').post(orderController.isDeliveryPossible);
+router.route('/validate', orderController.validate);
 
 module.exports = router;

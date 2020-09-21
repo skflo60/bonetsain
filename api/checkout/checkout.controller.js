@@ -67,6 +67,8 @@ exports.getSession = async (req, res, next) => {
 };
 
 exports.verifySession = async (req, res, next) => {
+  const stripe_key = process.env.stripe_key;
+  const stripe = new Stripe(stripe_key);
   await stripe.checkout.sessions.retrieve(req.params.uid,
     function(err, session) {
       if (session) {
