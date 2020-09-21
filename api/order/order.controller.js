@@ -40,8 +40,8 @@ exports.findById = async (req, res, next) => {
 };
 
 exports.validate = async (req, res, next) => {
-  const sig = request.headers['stripe-signature'];
-  const body = request.body;
+  const sig = req.headers['stripe-signature'];
+  const body = req.body;
 
   let event = null;
 
@@ -49,10 +49,10 @@ exports.validate = async (req, res, next) => {
   const stripe = new Stripe(stripe_key);
 
   try {
-    event = stripe.webhooks.constructEvent(request.body, sig, stripe_key);
+    event = stripe.webhooks.constructEvent(req.body, sig, stripe_key);
   } catch (err) {
     // invalid signature
-    response.status(400).end();
+    res.status(400).end();
     return;
   }
 
@@ -82,7 +82,7 @@ exports.validate = async (req, res, next) => {
       break;
   }
 
-  response.sendStatus(200);
+  res.sendStatus(200);
 };
 
 exports.update = async (req, res, next) => {
