@@ -76,7 +76,7 @@ module.exports = {
       const user = await User.findOne({ username });
 
       if (!user) {
-        const shop = new Shop({
+        /** const shop = new Shop({
           name,
           email,
           address: validatedAddress.properties.name,
@@ -86,11 +86,10 @@ module.exports = {
         });
 
         const persistedShop = await shop.save();
-
+        */
         const user = new User({
           username,
           password: hash,
-          shop: persistedShop._id,
           location: validatedAddress.geometry
         });
 

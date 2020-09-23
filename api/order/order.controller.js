@@ -13,9 +13,14 @@ exports.findAll = async (req, res, next) => {
   try {
     const page = parseInt(req.query.page, 10) || 1;
     const pagesize = parseInt(req.query.pagesize) || 40;
-    const month = req.query.month
-    let filters = {}
-    filters.shop = req.query.shop
+    const month = req.query.month;
+    let filters = {};
+    if (req.query.shop) {
+      filters.shop = req.query.shop;
+    }
+    if (req.query.email) {
+      filters.email = req.query.email;
+    }
     const orders = await Order.paginate(
       filters,
       { page: page, limit: pagesize, sort: {createdAt: -1} }
@@ -26,6 +31,7 @@ exports.findAll = async (req, res, next) => {
       pages: orders.pages
     });
   } catch (error) {
+    console.log(error);
     res.status(500).json(error);
   }
 };
