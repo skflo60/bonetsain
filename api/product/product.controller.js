@@ -7,7 +7,7 @@ const cheerio = require('cheerio');
 exports.findAll = async (req, res, next) => {
   try {
     const page = parseInt(req.query.page, 10) || 1;
-    const pagesize = parseInt(req.query.pagesize) || 200;
+    const pagesize = parseInt(req.query.pagesize) || 300;
     const month = req.query.month
     let filters = {}
     if (month) {
@@ -45,7 +45,7 @@ exports.findAll = async (req, res, next) => {
   }
 };
 
-function jsUcfirst(string) 
+function jsUcfirst(string)
 {
     return string.charAt(0).toUpperCase() + string.slice(1);
 }

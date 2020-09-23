@@ -4,7 +4,7 @@ const Shop = require('./shop/shop.model');
 const request = require('superagent');
 const cheerio = require('cheerio');
 
-function jsUcfirst(string) 
+function jsUcfirst(string)
 {
     return string.charAt(0).toUpperCase() + string.slice(1);
 }
@@ -55,14 +55,16 @@ await asyncForEach(categs, async categ => {
       // For Each Drive product
       $('form').each(function (i, elem) {
           if ($(this).find('.product-title').text().trim() !== '') {
-            products.push(mapProduct($(this), categ.id));
+            if (!$(this).text().includes('Très prochainement !')) {
+              products.push(mapProduct($(this), categ.id));
+            }
           }
       });
       console.log("2/4 -> Preparing products for category " + categ.url.replace("https://drivefermier-somme.fr/amiens/", ""), products);
 
       await asyncForEach(products, async product => {
   		let producerName = jsUcfirst(product.producerName);
-  		
+
       let producer = await Shop.findOneAndUpdate({name: producerName}, { name: producerName, affiliatedShop: "5ed2794fcb7cfe00177a14fa", fromDrive: true}, {
         new: true,
         upsert: true // Make this update into an upsert
