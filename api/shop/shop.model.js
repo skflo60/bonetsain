@@ -26,6 +26,7 @@ const ShopSchema = new Schema({
   days: { monday: {}, tuesday: {}, wednesday: {}, thursday: {}, friday: {}, saturday: {}, sunday: {} },
   openings: [{weekday: Number, start: String, end: String}],
   affiliatedShop: { type: Schema.ObjectId, ref: 'Shop' },
+  specialty: String, // restaurant, epicerie
   fromDrive: Boolean,
   services: [String]
 });
