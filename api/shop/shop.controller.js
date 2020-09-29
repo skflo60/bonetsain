@@ -81,7 +81,7 @@ exports.findById = async (req, res, next) => {
   try {
     const shop = await Shop.findById(req.params.id).lean();
     shop.isOpen = isShopOpen(shop.days);
-    res.json({ shop });
+    res.status(200).json({ shop });
   } catch (error) {
     res.status(500).json(error);
   }

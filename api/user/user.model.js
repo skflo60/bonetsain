@@ -18,7 +18,7 @@ const UserSchema = new Schema({
     coordinates: [Number],
   },
   type: String,
-  days: { monday: {}, thuesday: {}, wednesday: {}, thursday: {}, friday: {}, saturday: {}, sunday: {} },
+  days: { monday: {}, tuesday: {}, wednesday: {}, thursday: {}, friday: {}, saturday: {}, sunday: {} },
   availableTimes: [{weekday: Number, start: String, end: String}],
   shop: { type: Schema.ObjectId, ref: 'Shop' },
 });

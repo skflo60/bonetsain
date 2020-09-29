@@ -21,7 +21,7 @@ const ShopSchema = new Schema({
   instagram: String,
   twitter: String,
   orderable: { type: Boolean, default: true },
-  days: { monday: {}, thuesday: {}, wednesday: {}, thursday: {}, friday: {}, saturday: {}, sunday: {} },
+  days: { monday: {}, tuesday: {}, wednesday: {}, thursday: {}, friday: {}, saturday: {}, sunday: {} },
   openings: [{weekday: Number, start: String, end: String}],
   affiliatedShop: { type: Schema.ObjectId, ref: 'Shop' },
   fromDrive: Boolean,

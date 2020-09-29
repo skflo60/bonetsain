@@ -45,7 +45,8 @@ exports.getSession = async (req, res, next) => {
       order.shop = shopKey
       order.cart = groupedCart[shopKey]
       order.total_ttc = amount / 100;
-      order.total_net = (total_brut * 0.96) - 0.30
+      const reduction = total_brut * 10 / 100;
+      order.total_net = (total_brut - reduction);
       const createdOrder = await Order.create(order);
       order.cart.forEach(async product => {
         // TODO double check product price
