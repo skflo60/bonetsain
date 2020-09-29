@@ -20,6 +20,8 @@ const ShopSchema = new Schema({
   facebook: String,
   instagram: String,
   twitter: String,
+  linkedin: String,
+  website: String,
   orderable: { type: Boolean, default: true },
   days: { monday: {}, tuesday: {}, wednesday: {}, thursday: {}, friday: {}, saturday: {}, sunday: {} },
   openings: [{weekday: Number, start: String, end: String}],

@@ -55,7 +55,7 @@ exports.validate = async (req, res, next) => {
   const stripe = new Stripe(stripe_key);
 
   try {
-    event = stripe.webhooks.constructEvent(req.body, sig, stripe_key);
+    event = stripe.webhooks.constructEvent(body, sig, "whsec_nqawI5DYgkdDqMbXFLlixxKBHHXasTF1");
   } catch (err) {
     // invalid signature
     res.status(400).json(err);
