@@ -40,7 +40,7 @@ const syncDriveFermier = async () => {
   { id: "5f65f3e487f96cd7362a9287", url: "https://drivefermier-somme.fr/amiens/boissons-et-alcools/" },
 ];
 
-const excludeList = [];
+const excludeList = ["BLANQUETTE DE VEAU (FLANCHET) DISPO LE 02..."];
 
 await asyncForEach(categs, async categ => {
   try {
