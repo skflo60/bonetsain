@@ -35,8 +35,6 @@ exports.findAll = async (req, res, next) => {
       { page: page, limit: pagesize, populate: 'producer' }
     );
 
-    console.log("RESULTS", products, filters);
-
     res.status(200).json({
       products: products.docs,
       currentPage: page,
