@@ -7,7 +7,7 @@ const cheerio = require('cheerio');
 exports.findAll = async (req, res, next) => {
   try {
     const page = parseInt(req.query.page, 10) || 1;
-    const pagesize = parseInt(req.query.pagesize) || 300;
+    const pagesize = parseInt(req.query.pagesize) || 170;
     const month = req.query.month
     let filters = {}
     if (month) {
@@ -34,6 +34,8 @@ exports.findAll = async (req, res, next) => {
       filters,
       { page: page, limit: pagesize, populate: 'producer' }
     );
+
+    console.log("RESULTS", products, filters);
 
     res.status(200).json({
       products: products.docs,
