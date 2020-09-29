@@ -59,7 +59,7 @@ await asyncForEach(categs, async categ => {
       $('form').each(function (i, elem) {
           if ($(this).find('.product-title').text().trim() !== '') {
             if (!excludeList.includes($(this).find('.product-title').text().trim())) {
-              if (!$(this).text().includes('Très prochainement !') && !$(this).text().includes('DISPO LE ') ) {
+              if (!$(this).text().includes('Très prochainement !') && !$(this).text().includes('DISPO LE') ) {
                 products.push(mapProduct($(this), categ.id));
               }
             }
