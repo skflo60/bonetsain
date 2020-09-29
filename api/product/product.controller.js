@@ -26,7 +26,7 @@ exports.findAll = async (req, res, next) => {
     }
 
     // Filter producer
-    if (req.query.search) {
+    if (req.query.search && req.query.search !== '') {
       filters.name = { $regex : new RegExp(req.query.search, "i") };
     }
 
