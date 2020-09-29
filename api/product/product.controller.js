@@ -41,6 +41,7 @@ exports.findAll = async (req, res, next) => {
       pages: products.pages
     });
   } catch (error) {
+    console.log(error);
     res.status(500).json(error);
   }
 };
