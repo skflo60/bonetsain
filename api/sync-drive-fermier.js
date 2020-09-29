@@ -39,6 +39,9 @@ const syncDriveFermier = async () => {
   { id: "5f037fb1ceceb9b99d12ef43", url: "https://drivefermier-somme.fr/amiens/epicerie-salee/" },
   { id: "5f65f3e487f96cd7362a9287", url: "https://drivefermier-somme.fr/amiens/boissons-et-alcools/" },
 ];
+
+const excludeList = [];
+
 await asyncForEach(categs, async categ => {
   try {
   	// TODO Delete old products
@@ -55,8 +58,10 @@ await asyncForEach(categs, async categ => {
       // For Each Drive product
       $('form').each(function (i, elem) {
           if ($(this).find('.product-title').text().trim() !== '') {
-            if (!$(this).text().includes('Très prochainement !')) {
-              products.push(mapProduct($(this), categ.id));
+            if (!excludeList.includes(domElement.find('.product-title').text().trim())) {
+              if (!$(this).text().includes('Très prochainement !') && !$(this).text().includes('Dispo le ') ) {
+                products.push(mapProduct($(this), categ.id));
+              }
             }
           }
       });
