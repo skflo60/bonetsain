@@ -1,4 +1,4 @@
-const Stripe = require('stripe');
+const stripe = require('stripe')(process.env.stripe_key);
 
 const Order = require('./order.model');
 const User = require('../user/user.model');
@@ -47,12 +47,9 @@ exports.findById = async (req, res, next) => {
 
 exports.validate = async (req, res, next) => {
   const sig = req.headers['stripe-signature'];
-  const body = req.body;
+  const body = req.rawBody || req.body;
 
   let event = null;
-
-  const stripe_key = process.env.stripe_key;
-  const stripe = new Stripe(stripe_key);
 
   try {
     event = stripe.webhooks.constructEvent(body, sig, "whsec_nqawI5DYgkdDqMbXFLlixxKBHHXasTF1");
