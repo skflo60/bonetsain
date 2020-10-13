@@ -7,7 +7,7 @@ const routes = require('./api');
 const mongoose = require('./config/mongoose');
 const model = require('./app.model');
 const cron = require('node-cron');
-const syncDriveFermier = require('./api/sync-drive-fermier')
+const syncDriveFermier = require('./api/sync-drive-fermier');
 
 app.use(express.json({limit: '50mb'}));
 app.use(express.urlencoded({limit: '50mb'}));
@@ -40,10 +40,8 @@ mongoose.connect();
 app.use(routes);
 
 cron.schedule('30 2 * * *', () => {
-  console.log('running a task every 5 minutes');
   syncDriveFermier();
 });
-
 syncDriveFermier();
 
 // Catch 404 and forward to error handler

@@ -11,10 +11,12 @@
   },
   "dependencies": {
     "@sendgrid/mail": "^7.1.0",
+    "atob": "^2.1.2",
     "bcrypt": "^3.0.6",
     "body-parser": "^1.18.3",
     "cheerio": "^1.0.0-rc.3",
     "cors": "^2.8.5",
+    "crypto": "^1.0.1",
     "express": "^4.16.4",
     "faker": "^4.1.0",
     "moment": "^2.24.0",
@@ -27,7 +29,8 @@
     "nodemailer": "^6.4.6",
     "socket.io": "^2.2.0",
     "stripe": "^8.39.2",
-    "superagent": "^6.0.0"
+    "superagent": "^6.0.0",
+    "unsplash-js": "^6.3.0"
   },
   "devDependencies": {
     "jest": "^25.2.3"
