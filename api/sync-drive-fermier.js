@@ -153,11 +153,10 @@ const createObject = async (container_id = '5f860b4197b5402863e09bd8', object = 
         .set(headers)
         .send(buff)
         .end(async (err, r) => {
-          console.log(err);
+          if (err) console.log(err);
           resolve(r.body.object)
         })
       } else {
-        console.log(err);
         resolve(err)
       }
     })
@@ -266,7 +265,7 @@ const syncDriveFermier = async () => {
             new: true,
             upsert: true // Make this update into an upsert
           });
-          console.log("3/4 -> Upserting product", product.name);
+          console.log("3/4 -> Upserting product", product.name, product.image);
         });
         console.log("4/4 -> FINISH SUCCESS");
         // Return Sync Success
