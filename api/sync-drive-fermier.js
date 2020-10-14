@@ -3,20 +3,22 @@ const Product = require('./product/product.model');
 const Shop = require('./shop/shop.model');
 const request = require('superagent');
 const cheerio = require('cheerio');
-const Unsplash = require('unsplash-js');
-const { toJson } = require('unsplash-js');
+require('es6-promise').polyfill();
+require('isomorphic-fetch');
+const Unsplash = require('unsplash-js').default;
+const toJson = require('unsplash-js').toJson;
 const crypto = require('crypto');
 const fs = require('fs');
 
 function titleCase(str) {
-   var splitStr = str.toLowerCase().split(' ');
-   for (var i = 0; i < splitStr.length; i++) {
-       // You do not need to check if i is larger than splitStr length, as your for does that for you
-       // Assign it back to the array
-       splitStr[i] = splitStr[i].charAt(0).toUpperCase() + splitStr[i].substring(1);
-   }
-   // Directly return the joined string
-   return splitStr.join(' ');
+  var splitStr = str.toLowerCase().split(' ');
+  for (var i = 0; i < splitStr.length; i++) {
+    // You do not need to check if i is larger than splitStr length, as your for does that for you
+    // Assign it back to the array
+    splitStr[i] = splitStr[i].charAt(0).toUpperCase() + splitStr[i].substring(1);
+  }
+  // Directly return the joined string
+  return splitStr.join(' ');
 }
 
 var ID = function () {
@@ -25,18 +27,18 @@ var ID = function () {
 
 function dataURLtoFile(dataurl, filename) {
 
-        var arr = dataurl.split(','),
-            mime = arr[0].match(/:(.*?);/)[1],
-            bstr = atob(arr[1]),
-            n = bstr.length,
-            u8arr = new Uint8Array(n);
+  var arr = dataurl.split(','),
+  mime = arr[0].match(/:(.*?);/)[1],
+  bstr = atob(arr[1]),
+  n = bstr.length,
+  u8arr = new Uint8Array(n);
 
-        while(n--){
-            u8arr[n] = bstr.charCodeAt(n);
-        }
+  while(n--){
+    u8arr[n] = bstr.charCodeAt(n);
+  }
 
-        return new File([u8arr], filename, {type:mime});
-    }
+  return new File([u8arr], filename, {type:mime});
+}
 
 function base64MimeType(encoded) {
   var result = null;
@@ -108,6 +110,24 @@ const getEMStorageHeaders = (VERB =	"GET", URI = "/objects/:container_id/:object
   return headers
 }
 
+const cleanObjects = async (container_id = '5f860b4197b5402863e09bd8') => {
+  return new Promise(async (resolve, reject) => {
+    const headers = getEMStorageHeaders("GET", "/objects/" + container_id, new Date().getTime())
+    await request
+    .get('https://api.emstorage.fr/objects/' + container_id)
+    .set(headers)
+    .end(async (err, resp) => {
+      await asyncForEach(resp.body.objects, async object => {
+        const headers = getEMStorageHeaders("DELETE", "/objects/" + container_id + '/' + object.id, new Date().getTime())
+        await request
+        .delete('https://api.emstorage.fr/objects/' + container_id + '/' + object.id)
+        .set(headers).end();
+      });
+      resolve();
+    });
+  })
+}
+
 const createObject = async (container_id = '5f860b4197b5402863e09bd8', object = {}, custom_data = {}) => {
   return new Promise((resolve, reject) => {
     const name = object.name + ID();
@@ -122,17 +142,22 @@ const createObject = async (container_id = '5f860b4197b5402863e09bd8', object = 
     })
     .end(async (err, resp) => {
       if (resp.body.success) {
-        const buff = new Buffer(object.data, 'base64');
+        const base64 = object.data.replace('data:image/png;base64,', '')
+        .replace('data:image/jpeg;base64,', '')
+        .replace('data:image/gif;base64,', '');
+        const buff = new Buffer(base64, 'base64');
         const created_object = resp.body.object
         const headers = getEMStorageHeaders("POST", '/objects/' + container_id + '/' + created_object.id + '/bytes', new Date().getTime(), true)
         request
         .post('https://api.emstorage.fr/objects/' + container_id + '/' + created_object.id + '/bytes')
         .set(headers)
-        .send(fs.writeFileSync(name, buff))
+        .send(buff)
         .end(async (err, r) => {
+          console.log(err);
           resolve(r.body.object)
         })
       } else {
+        console.log(err);
         resolve(err)
       }
     })
@@ -140,23 +165,27 @@ const createObject = async (container_id = '5f860b4197b5402863e09bd8', object = 
 }
 
 const mapProduct = async (domElement, category = "5cd9d2e91c9d440000a9b251") => {
-  let image = null;
+  let image = '/legumes.jpg';
   if (domElement.find('img').attr('src') && domElement.find('img').attr('src') !== '') {
     image = await loadBase64Image(domElement.find('img').attr('src'));
   }
-  /**if (!image) {
+  if (!image) {
     const imgUrl = await getImageFromUnsplash(domElement.find('.product-title').text().trim())
     image = await loadBase64Image(imgUrl);
-  }**/
-  //const file = { name: domElement.find('.product-title').text().trim().toLowerCase(), data: image, mimetype: base64MimeType(image)};
-  // const object = await createObject('5f860b4197b5402863e09bd8', file, {});
-  // console.log("EMSTORAGE OBJECT WORKS !!!!!!!!!!", object);
+  }
+  const file = { name: domElement.find('.product-title').text().trim().toLowerCase(), data: image, mimetype: base64MimeType(image)};
+  let object = await createObject('5f860b4197b5402863e09bd8', file, {});
+  if (!object || !object.public_url) {
+    object = { public_url: image };
+  } else {
+    object.public_url = 'https://' + object.public_url;
+  }
   return {
     name: domElement.find('.product-title').text().trim(),
     price: Math.round(((+(domElement.find('.ty-price-num').text().trim().replace('€', '').replace(',', '.')) + 0.2) * 1.1 + Number.EPSILON) * 10) / 10,
     category,
     shop: "5ed2794fcb7cfe00177a14fa",
-    image,//: object.public_url,
+    image: object.public_url,
     producerName: domElement.find('.company-name').text().trim(),
     fromDrive: true,
     description: ''
@@ -183,6 +212,8 @@ const syncDriveFermier = async () => {
       // TODO Delete old products
       // await Shop.deleteMany({ fromDrive: true });
       await Product.deleteMany({ fromDrive: true });
+      // Clean EM objects
+      await cleanObjects();
       console.log("1/4 -> Getting products for category " + categ.url.replace("https://drivefermier-somme.fr/amiens/", ""));
       request
       .get(categ.url)
@@ -219,7 +250,7 @@ const syncDriveFermier = async () => {
 
         products = await Promise.all(promises);
 
-        console.log("2/4 -> Preparing products for category " + categ.url.replace("https://drivefermier-somme.fr/amiens/", ""), products);
+        console.log("2/4 -> Preparing products for category " + categ.url.replace("https://drivefermier-somme.fr/amiens/", ""));
 
         await asyncForEach(products, async product => {
           let producerName = titleCase(product.producerName);
@@ -235,7 +266,7 @@ const syncDriveFermier = async () => {
             new: true,
             upsert: true // Make this update into an upsert
           });
-          console.log("3/4 -> Upserting product", product);
+          console.log("3/4 -> Upserting product", product.name);
         });
         console.log("4/4 -> FINISH SUCCESS");
         // Return Sync Success
