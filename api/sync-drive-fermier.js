@@ -130,7 +130,7 @@ const cleanObjects = async (container_id = '5f860b4197b5402863e09bd8') => {
 
 const createObject = async (container_id = '5f860b4197b5402863e09bd8', object = {}, custom_data = {}) => {
   return new Promise((resolve, reject) => {
-    const name = object.name + ID();
+    const name = ID();
     const headers = getEMStorageHeaders("POST", "/objects/" + container_id, new Date().getTime())
     request
     .post('https://api.emstorage.fr/objects/' + container_id)
@@ -177,7 +177,7 @@ const mapProduct = async (domElement, category = "5cd9d2e91c9d440000a9b251") => 
   if (!object || !object.public_url) {
     object = { public_url: image };
   } else {
-    object.public_url = 'https://' + object.public_url;
+    object.public_url = 'https://' + object.public_url + '?json=[{"filter_id":"toPNG"},{"filter_id":"optipng"}]';
   }
   return {
     name: domElement.find('.product-title').text().trim(),
