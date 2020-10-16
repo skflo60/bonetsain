@@ -174,10 +174,10 @@ const mapProduct = async (domElement, category = "5cd9d2e91c9d440000a9b251") => 
   }
   const file = { name: domElement.find('.product-title').text().trim().toLowerCase(), data: image, mimetype: base64MimeType(image)};
   let object = await createObject('5f860b4197b5402863e09bd8', file, {});
-  if (!object || !object.public_url) {
+  if (!object || !object.public_url || !object.mime) {
     object = { public_url: image };
   } else {
-    object.public_url = 'https://' + object.public_url + '?json=[{"filter_id":"toPNG"},{"filter_id":"optipng"}]';
+    object.public_url = 'https://' + object.public_url + '?profile=power';
   }
   return {
     name: domElement.find('.product-title').text().trim(),
