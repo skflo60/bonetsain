@@ -99,12 +99,15 @@ exports.findAllFromDrive = async (req, res, next) => {
 
 exports.findRelated = async (req, res, next) => {
   try {
+    let products = [];
     const product = await Product.findById(req.params.id).populate("shop").populate("producer").lean();
-    const productSize = 3;
-    const products = await Product.aggregate([
-      { $match: { category: product.category, shop: product.shop._id } },
-      { $sample: { size: productSize } }
-    ]);
+    if (product) {
+      const productSize = 3;
+      products = await Product.aggregate([
+        { $match: { category: product.category, shop: product.shop._id } },
+        { $sample: { size: productSize } }
+      ]);
+    }
     res.status(200).json({
       products,
       success: true

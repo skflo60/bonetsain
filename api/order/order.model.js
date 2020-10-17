@@ -18,6 +18,7 @@ const OrderSchema = new Schema({
   cart: Object,
   shop: { type: Schema.ObjectId, ref: 'Shop' },
   deliveryMan: { type: Schema.ObjectId, ref: 'User' },
+  discount: { start: { type: Date}, end: { type: Date }, coupon: { type: Schema.ObjectId, ref: 'Coupon' } },
   deliveryEmail: String,
   session_id: String, // Stripe session id
   state: String,

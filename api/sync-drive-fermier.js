@@ -117,11 +117,15 @@ const cleanObjects = async (container_id = '5f860b4197b5402863e09bd8') => {
     .get('https://api.emstorage.fr/objects/' + container_id)
     .set(headers)
     .end(async (err, resp) => {
+      console.log(resp.body.objects.length);
       await asyncForEach(resp.body.objects, async object => {
+        console.log(object.filename);
         const headers = getEMStorageHeaders("DELETE", "/objects/" + container_id + '/' + object.id, new Date().getTime())
         await request
         .delete('https://api.emstorage.fr/objects/' + container_id + '/' + object.id)
-        .set(headers).end();
+        .set(headers).end((err, res) => {
+          console.log(err, object.filename, ' cleaned');
+        });
       });
       resolve();
     });
@@ -175,7 +179,7 @@ const mapProduct = async (domElement, category = "5cd9d2e91c9d440000a9b251") => 
   const file = { name: domElement.find('.product-title').text().trim().toLowerCase(), data: image, mimetype: base64MimeType(image)};
   let object = await createObject('5f860b4197b5402863e09bd8', file, {});
   if (!object || !object.public_url || !object.mime) {
-    object = { public_url: image };
+    object = { public_url: domElement.find('img').attr('src') };
   } else {
     object.public_url = 'https://' + object.public_url + '?profile=power';
   }
@@ -206,75 +210,78 @@ const syncDriveFermier = async () => {
   const excludeList = ["BLANQUETTE DE VEAU (FLANCHET) DISPO LE 02..."];
   const allowedProducers = ["COLONEL KEF", "DOMAINE DE MOISMONT", "PARMENTIER FRANCIS", "MIELLERIE DE L'HALLUETTE", "FERME DES COLLINES", "GAEC SAINT GERARD"];
 
-  await asyncForEach(categs, async categ => {
-    try {
-      // TODO Delete old products
-      // await Shop.deleteMany({ fromDrive: true });
-      await Product.deleteMany({ fromDrive: true });
-      // Clean EM objects
-      await cleanObjects();
-      console.log("1/4 -> Getting products for category " + categ.url.replace("https://drivefermier-somme.fr/amiens/", ""));
-      request
-      .get(categ.url)
-      .withCredentials()
-      .then(async result => {
-        var $ = cheerio.load(result.text);
-        var products = [];
+  await cleanObjects();
+  console.log("EM Storage cleaned");
+  setTimeout(async () => {
+    await asyncForEach(categs, async categ => {
+      try {
+        // TODO Delete old products
+        // await Shop.deleteMany({ fromDrive: true });
+        await Product.deleteMany({ fromDrive: true });
+        // Clean EM objects
+        console.log("1/4 -> Getting products for category " + categ.url.replace("https://drivefermier-somme.fr/amiens/", ""));
+        request
+        .get(categ.url)
+        .withCredentials()
+        .then(async result => {
+          var $ = cheerio.load(result.text);
+          var products = [];
 
-        // For Each Drive product
-        var promises = [];
-        $('form').each(function (i, elem) {
+          // For Each Drive product
+          var promises = [];
+          $('form').each(function (i, elem) {
 
-          if ($(this).find('.product-title').text().trim() !== '') {
+            if ($(this).find('.product-title').text().trim() !== '') {
 
-            if (allowedProducers.includes($(this).find('.company-name').text().trim())) {
+              if (allowedProducers.includes($(this).find('.company-name').text().trim())) {
 
-              if (!excludeList.includes($(this).find('.product-title').text().trim())) {
+                if (!excludeList.includes($(this).find('.product-title').text().trim())) {
 
-                if (!$(this).text().includes('Très prochainement !')
-                && !$(this).text().includes('DISPO LE')
-                && !$(this).text().includes('DISPONIBLE LE')
-                && !$(this).text().includes('Acompte*')) {
-                  const product = mapProduct($(this), categ.id);
-                  promises.push(product);
-                } // END DISPO
+                  if (!$(this).text().includes('Très prochainement !')
+                  && !$(this).text().includes('DISPO LE')
+                  && !$(this).text().includes('DISPONIBLE LE')
+                  && !$(this).text().includes('Acompte*')) {
+                    const product = mapProduct($(this), categ.id);
+                    promises.push(product);
+                  } // END DISPO
 
-              }  // END EXCLUDE PRODUCTS
+                }  // END EXCLUDE PRODUCTS
 
-            }  // END ALLOWED PRODUCERS
+              }  // END ALLOWED PRODUCERS
 
-          } // END PAS DE PRODUIT VIDE
+            } // END PAS DE PRODUIT VIDE
 
-        });  // END FORM EACH
+          });  // END FORM EACH
 
-        products = await Promise.all(promises);
+          products = await Promise.all(promises);
 
-        console.log("2/4 -> Preparing products for category " + categ.url.replace("https://drivefermier-somme.fr/amiens/", ""));
+          console.log("2/4 -> Preparing products for category " + categ.url.replace("https://drivefermier-somme.fr/amiens/", ""));
 
-        await asyncForEach(products, async product => {
-          let producerName = titleCase(product.producerName);
+          await asyncForEach(products, async product => {
+            let producerName = titleCase(product.producerName);
 
-          let producer = await Shop.findOneAndUpdate({name: producerName}, { name: producerName, affiliatedShop: "5ed2794fcb7cfe00177a14fa", fromDrive: true}, {
-            new: true,
-            upsert: true // Make this update into an upsert
+            let producer = await Shop.findOneAndUpdate({name: producerName}, { name: producerName, affiliatedShop: "5ed2794fcb7cfe00177a14fa", fromDrive: true}, {
+              new: true,
+              upsert: true // Make this update into an upsert
+            });
+            product.producer = producer;
+
+            // Insert Product If Does't exist
+            let doc = await Product.findOneAndUpdate({name: product.name}, product, {
+              new: true,
+              upsert: true // Make this update into an upsert
+            });
+            console.log("3/4 -> Upserting product", product.name, product.image);
           });
-          product.producer = producer;
-
-          // Insert Product If Does't exist
-          let doc = await Product.findOneAndUpdate({name: product.name}, product, {
-            new: true,
-            upsert: true // Make this update into an upsert
-          });
-          console.log("3/4 -> Upserting product", product.name, product.image);
-        });
-        console.log("4/4 -> FINISH SUCCESS");
-        // Return Sync Success
-        return true
-      })
-    } catch (error) {
-      return false
-    }
-  }); // end for each categ
+          console.log("4/4 -> FINISH SUCCESS");
+          // Return Sync Success
+          return true
+        })
+      } catch (error) {
+        return false
+      }
+    }); // end for each categ
+  }, 13000);
 };
 
 module.exports = syncDriveFermier;
