@@ -113,9 +113,9 @@ const getEMStorageHeaders = (VERB =	"GET", URI = "/objects/:container_id/:object
 
 const cleanObjects = async (container_id = '5f8d55ec03815518b10a4700') => {
   return new Promise(async (resolve, reject) => {
-    const headers = getEMStorageHeaders("GET", "/objects/" + container_id + '?offset=0&limit=1000', new Date().getTime())
+    const headers = getEMStorageHeaders("GET", "/objects/" + container_id + '', new Date().getTime())
     await request
-    .get('https://api.emstorage.fr/objects/' + container_id + '?offset=0&limit=1000')
+    .get('https://api.emstorage.fr/objects/' + container_id + '')
     .set(headers)
     .end(async (err, resp) => {
       console.log(resp.body.objects.length);
@@ -169,13 +169,13 @@ const createObject = async (container_id = '5f8d55ec03815518b10a4700', object = 
   })
 }
 
-const getObjects = async (filename = "", container_id = '5f8d55ec03815518b10a4700') => {
-  return new Promise(async (resolve, reject) => {
-    const headers = getEMStorageHeaders("GET", "/objects/" + container_id + '?offset=0&limit=0', new Date().getTime())
-    await request
-    .get('https://api.emstorage.fr/objects/' + container_id + '?offset=0&limit=0')
+const getObjects = async (offset = 0, limit = 50, container_id = '5f8d55ec03815518b10a4700') => {
+  return new Promise((resolve, reject) => {
+    const headers = getEMStorageHeaders("GET", `/objects/${container_id}?offset=${offset}&limit=0`, new Date().getTime())
+    request
+    .get(`https://api.emstorage.fr/objects/${container_id}?offset=${offset}&limit=0`)
     .set(headers)
-    .end(async (err, resp) => {
+    .end((err, resp) => {
       if (err) console.log(err);
       resolve(resp.body.objects);
     });
@@ -194,7 +194,6 @@ const mapProduct = async (domElement, category = "5cd9d2e91c9d440000a9b251") => 
   const file = { name: domElement.find('.product-title').text().trim().toLowerCase(), data: image, mimetype: base64MimeType(image)};
   const shortName = file&&file.name ? file.name.replace(/[&\/\\#, +()$~%.'":*?<>{}]/g, '_') : '';
   let object = objects.find(obj => obj.filename===shortName);
-  console.log("IS FOUND OBJECT ?", object);
   if (!object) {
     object = await createObject('5f8d55ec03815518b10a4700', file, {});
   }
@@ -240,8 +239,10 @@ const syncDriveFermier = async () => {
         // await Shop.deleteMany({ fromDrive: true });
         await Product.deleteMany({ fromDrive: true });
 
-        objects = await getObjects();
-        console.log("OBJECTS ", objects);
+        objects = await getObjects(0);
+        console.log(objects.length);
+        objects = [...objects, ...await getObjects(50)];
+        console.log("OBJECTS ", objects.length);
         // Clean EM objects
         console.log("1/4 -> Getting products for category " + categ.url.replace("https://drivefermier-somme.fr/amiens/", ""));
         request
