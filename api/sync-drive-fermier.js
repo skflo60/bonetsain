@@ -10,6 +10,16 @@ const toJson = require('unsplash-js').toJson;
 const crypto = require('crypto');
 const fs = require('fs');
 var objects = [];
+var updateImg = false;
+
+const getTranslation = (text) => {
+  const translations = {
+    "betterave": "Beet",
+    "préparation": "Cookies",
+    "courge": "Squash"
+  };
+  return translations[text];
+};
 
 function titleCase(str) {
   var splitStr = str.toLowerCase().split(' ');
@@ -76,7 +86,7 @@ const loadBase64Image = async (url) => {
 const getImageFromUnsplash = async (text) => {
   return new Promise((resolve, reject) => {
     const unsplash = new Unsplash({ accessKey: "dxien-EtOnRWdFYkpkOqPT1tSQjiNNi1VDKLZSDCI8U" });
-    unsplash.search.photos(text, 1, 10, { orientation: "portrait" })
+    unsplash.search.photos(text, 1, 10, {})
     .then(toJson)
     .then(json => {
       if (json.results && json.results[0]) {
@@ -182,23 +192,48 @@ const getObjects = async (offset = 0, limit = 50, container_id = '5f8d55ec038155
     });
   }
 
+  const mapName = (name = "") => {
+    const mapper = {
+      "Betterave mélanger 1 kg": "Betterave mélangées (1kg)"
+    }
+    return mapper[name] || name;
+  }
+
   const mapProduct = async (domElement, category = "5cd9d2e91c9d440000a9b251") => {
     let image = '/legumes.jpg';
     if (domElement.find('img').attr('src') && domElement.find('img').attr('src') !== '') {
       image = await loadBase64Image(domElement.find('img').attr('src'));
     }
+    updateImg = false;
     if (!image) {
-      const imgUrl = await getImageFromUnsplash(domElement.find('.product-title').text().trim())
-      image = await loadBase64Image(imgUrl);
+      const text = domElement.find('.product-title').text().trim().split(" ")[0].toLowerCase();
+      try {
+        console.log(getTranslation(text));
+      } catch (e) {
+        console.log(e);
+      }
+      const keyWorld = getTranslation(text);
+      console.log(keyWorld, text);
+      let imgUrl;
+      try {
+        imgUrl = await getImageFromUnsplash(keyWorld);
+      } catch (e) {
+        console.log(e);
+      }
+      console.log("URL unsplash", imgUrl);
+      image = imgUrl;
+      // image = imgUrl ? await loadBase64Image(imgUrl) : '/legumes.jpg';
+      updateImg = true;
     }
     const file = { name: domElement.find('.product-title').text().trim().toLowerCase(), data: image, mimetype: base64MimeType(image)};
     const shortName = file&&file.name ? file.name.replace(/[&\/\\#, +()$~%.'":*?<>{}]/g, '_') : '';
     let object = objects.find(obj => (obj.filename + '' == shortName + ''));
-    if (shortName == 'images-localfrais.emstorage.fr/farine_de_blés_anciens_s') {
-      console.log(object);
-    }
     if (!object) {
       object = await createObject('5f8d55ec03815518b10a4700', file, {});
+    } else {
+      if (updateImg) {
+        object.public_url = image;
+      }
     }
     if (!object || !object.public_url || !object.mime) {
       object = { public_url: domElement.find('img').attr('src') };
@@ -208,7 +243,7 @@ const getObjects = async (offset = 0, limit = 50, container_id = '5f8d55ec038155
       object.public_url = https + object.public_url + '?profile=power';
     }
     return {
-      name: domElement.find('.product-title').text().trim(),
+      name: mapName(domElement.find('.product-title').text().trim()),
       price: Math.round(((+(domElement.find('.ty-price-num').text().trim().replace('€', '').replace(',', '.')) + 0.2) * 1.1 + Number.EPSILON) * 10) / 10,
       category,
       shop: "5ed2794fcb7cfe00177a14fa",
