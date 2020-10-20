@@ -20,7 +20,7 @@ exports.getSession = async (req, res, next) => {
   const shops = Object.keys(groupedCart);
   const total_brut = Number(cart.map(c=>c.subtotal).reduce((acc, val) => acc + val).toFixed(2));
   const amount = Math.round((total_brut + DELIVERY_COST)*100);
-  const test = shops[0] === '5e1e38a41c9d44000073a0a8';
+  const test = order.name === 'test';
   (async () => {
     const stripe_key = test ? 'sk_test_WkZb6QtYaD3nzlVSxbIFXXhQ00Txor8IU5' : process.env.stripe_key;
     const stripe = new Stripe(stripe_key);
