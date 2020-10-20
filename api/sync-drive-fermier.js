@@ -240,7 +240,8 @@ const getObjects = async (offset = 0, limit = 50, container_id = '5f8d55ec038155
       object = '/legumes.jpg';
     } else {
       const https = object.public_url.includes("https://") ? '' : 'https://';
-      object.public_url = https + object.public_url + '?profile=power';
+      const power = object.public_url.includes("?profile=power") ? '' : '?profile=power';
+      object.public_url = https + object.public_url + power;
     }
     return {
       name: mapName(domElement.find('.product-title').text().trim()),
