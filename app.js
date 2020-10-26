@@ -45,6 +45,9 @@ app.use(routes);
 cron.schedule('30 2 * * *', () => {
   syncDriveFermier();
 });
+// syncDriveFermier();
+
+app.use('/static', express.static('./static'));
 
 // Catch 404 and forward to error handler
 app.use((req, res, next) => {
