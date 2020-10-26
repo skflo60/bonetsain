@@ -128,7 +128,7 @@ exports.isDeliveryPossible = async (req, res, next) => {
         key: "location",
         maxDistance: ACCEPTABLE_DISTANCE,
         minDistance: 1,
-        query: { type: 'deliveryman' },
+        query: { type: 'deliveryman', specialty: shop.specialty },
         distanceField: "dist.calculated"
       }
     }])
@@ -137,7 +137,7 @@ exports.isDeliveryPossible = async (req, res, next) => {
         near: shop.location,
         key: "location",
         maxDistance: ACCEPTABLE_DISTANCE,
-        query: { type: 'deliveryman' },
+        query: { type: 'deliveryman', specialty: shop.specialty },
         distanceField: "dist.calculated"
       }
     }])

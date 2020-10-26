@@ -18,6 +18,7 @@ const UserSchema = new Schema({
     coordinates: [Number],
   },
   type: String,
+  specialty: String,
   days: { monday: {}, tuesday: {}, wednesday: {}, thursday: {}, friday: {}, saturday: {}, sunday: {} },
   availableTimes: [{weekday: Number, start: String, end: String}],
   shop: { type: Schema.ObjectId, ref: 'Shop' },
