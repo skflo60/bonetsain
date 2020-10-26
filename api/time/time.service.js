@@ -27,13 +27,19 @@ const isAnOpeningTime = (currentTime = "17:00", dayTimes = []) => {
   return isBetween;
 }
 
-// Time = { weekday, start, end }, a day can have multiple time
-const getDifferentTimes = (now = moment(), ressourceTimes = []) => {
-  let foundTimes = [];
-  let currentTime = now.add(1, "hour")
-  if (currentTime.minutes() > 30) {
+const addTime = (currentTime = moment(), isRestaurant = false) => {
+  if (isRestaurant) {
+    currentTime.add(15, "minute");
+  } else {
     currentTime.add(1, "hour");
   }
+  return currentTime;
+}
+
+// Time = { weekday, start, end }, a day can have multiple time
+const getDifferentTimes = (now = moment(), ressourceTimes = [], isRestaurant = false) => {
+  let foundTimes = [];
+  let currentTime = now
   currentTime.minutes(0);
 
   // For each shop
@@ -48,7 +54,7 @@ const getDifferentTimes = (now = moment(), ressourceTimes = []) => {
           // Addind time to found times
           foundTimes.push(formatTime(currentTime));
         }
-        currentTime.add(1, "hour");
+        addTime(currentTime, isRestaurant);
       } else {
         currentTime.add(1, "day");
         currentTime.hour(6)

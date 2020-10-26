@@ -16,33 +16,27 @@ exports.findAll = async (req, res, next) => {
     // Shop times
     for (let i=0; i<shopsSet.length; i++) {
       const shop = shopsSet[i];
-      const foundShop = await Shop.findById(shop, "_id name openings").lean();
+      const foundShop = await Shop.findById(shop, "_id name openings specialty").lean();
 
       // Livreur
       deliveryMan = await User.findOne({_id: { $in: [req.query.deliverymen]}}).lean();
 
       // Commandes en cours
       const orders = await Order.find({ shop, selectedTime: { $gte: new Date() }});
-      const unavailableTimes = ['2020-09-01 20:00', '2020-09-01 19:00', '2020-09-01 21:00', '2020-08-22 08:00', '2020-08-22 09:00',
-    '2020-08-25 18:00', '2020-08-25 19:00', '2020-08-25 20:00', '2020-08-25 21:00',
-  '2020-08-29 08:00', '2020-08-29 09:00',
-'2020-09-01 18:00', '2020-09-01 19:00', '2020-09-01 20:00', '2020-09-01 21:00',
-'2020-09-05 08:00', '2020-09-05 09:00',
-'2020-09-08 18:00', '2020-09-08 19:00', '2020-09-08 20:00', '2020-09-08 21:00',
-'2020-09-12 08:00', '2020-09-12 09:00',
-'2020-09-26 09:00', '2020-09-26 10:00']; // TODO limit to x orders by times // orders ? orders.map(o=>o.selectedTime) : [];
-      const shopTimes = getDifferentTimes(moment(), [foundShop.openings]);
-      const deliveryTimes = getDifferentTimes(moment(), [deliveryMan.availableTimes]);
-      console.log("unavailableTimes1", unavailableTimes);
+      const unavailableTimes = []; // TODO limit to x orders by times // orders ? orders.map(o=>o.selectedTime) : [];
+      const shopTimes = getDifferentTimes(moment(), [foundShop.openings], (foundShop.specialty==='restaurant'));
+      const deliveryTimes = getDifferentTimes(moment(), [deliveryMan.availableTimes], (foundShop.specialty==='restaurant'));
       tmpTimes.push(getTimes(shopTimes, deliveryTimes, unavailableTimes))
+      console.log("times", shopTimes, deliveryTimes, tmpTimes[0]);
     }
     tmpTimes = tmpTimes.sort((a, b) => (a[0].isoDate > b[0].isoDate) ? 1 : -1)
 
     const minTime = tmpTimes[tmpTimes.length - 1][0] ? tmpTimes[tmpTimes.length - 1][0].isoDate : null;
-
+    console.log(minTime);
     tmpTimes[0] = tmpTimes[0].filter(time => {
-      return moment(time.isoDate).isAfter(moment(minTime))
+      return moment(time.isoDate).diff(moment(minTime)) >= 0;
     })
+    console.log(tmpTimes[0]);
     res.status(200).json({
       times: tmpTimes[0],
       deliveryMan: deliveryMan._id,
