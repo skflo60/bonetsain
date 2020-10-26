@@ -40,6 +40,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 model.initialize();
 mongoose.connect();
+app.use('/static', express.static('./static'));
+
 app.use(routes);
 
 cron.schedule('30 2 * * *', () => {
@@ -47,7 +49,6 @@ cron.schedule('30 2 * * *', () => {
 });
 // syncDriveFermier();
 
-app.use('/static', express.static('./static'));
 
 // Catch 404 and forward to error handler
 app.use((req, res, next) => {
