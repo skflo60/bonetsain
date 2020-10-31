@@ -1,4 +1,4 @@
-const { Coupon } = require('./coupon.model');
+const Coupon = require('./coupon.model');
 
 /**
 * @swagger
@@ -29,11 +29,11 @@ const create = async function(req, res) {
   let err, existing_coupon;
 
   let new_coupon;
-  [err, new_coupon] = await to(Coupon.create(coupon_infos));
+  [err, new_coupon] = await Coupon.create(coupon_infos);
 
-  if(err) return ReE(res, err, 422);
+  if(err) return res.status(422).json(err);
 
-  return ReS(res, {new_coupon: new_coupon.toWeb()}, 201);
+  return res.status(200).json({new_coupon: new_coupon.toWeb()}, 201);
 };
 
 /**
@@ -62,6 +62,7 @@ const getAll = async function(req, res) {
   res.setHeader('Content-Type', 'application/json');
   let err, coupons;
   let filters = {};
+  console.log("QUERY ", req.query);
   if (req.query.code) {
     const limitDateCondition = { $or: [ { end: { $gte: new Date() } }, { end: null } ] };
     filters = {
@@ -71,9 +72,8 @@ const getAll = async function(req, res) {
       ]
     };
   }
-  console.log(filters);
-  [err, coupons] = await to(Coupon.find(filters).sort({ createdAt: -1 }));
-  return ReS(res, {coupons});
+  coupons = await Coupon.find(filters).sort({ createdAt: -1 });
+  return res.status(200).json({coupons});
 };
 
 const getOne = async function(req, res) {}
@@ -82,9 +82,9 @@ const update = async function(req, res) {}
 
 const remove = async function(req, res) {
   let coupon, err;
-  [err, coupon] = await to(Coupon.findOneAndRemove({ _id: req.params.uid }));
+  [err, coupon] = await Coupon.findOneAndRemove({ _id: req.params.uid });
   console.log(err, "deleted", coupon);
-  return ReS(res, true);
+  return res.status(200).json(true);
 }
 
 module.exports = { create, getAll, getOne, update, remove };

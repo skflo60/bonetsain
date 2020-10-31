@@ -192,9 +192,23 @@ const getObjects = async (offset = 0, limit = 50, container_id = '5f8d55ec038155
     });
   }
 
+  const getPriceUnit = (priceText = '', showedPrice = 0, estimatedQty = 1) => {
+    const [price, unit] = priceText.split(' ');
+    if (!unit.includes('unité')) {
+      if (estimatedQty === 0.5 || estimatedQty === 500) {
+        return ''
+      } else {
+        return ''
+      }
+    }
+    return '';
+  }
+
   const mapName = (name = "") => {
     const mapper = {
-      "Betterave mélanger 1 kg": "Betterave mélangées (1kg)"
+      "Betterave mélanger 1 kg": "Betteraves mélangées (1kg)",
+      "Carotte melanger 1 kg": "Mélange de carottes (1kg)",
+      "Poireaux la botte 1 l": "Poireaux (la botte)"
     }
     return mapper[name] || name;
   }
@@ -243,15 +257,17 @@ const getObjects = async (offset = 0, limit = 50, container_id = '5f8d55ec038155
       const power = object.public_url.includes("?profile=power") ? '' : '?profile=power';
       object.public_url = https + object.public_url + power;
     }
+    const showedPrice = Math.round(((+(domElement.find('.ty-price-num').text().trim().replace('€', '').replace(',', '.')) + 0.2) * 1.1 + Number.EPSILON) * 10) / 10;
     return {
       name: mapName(domElement.find('.product-title').text().trim()),
-      price: Math.round(((+(domElement.find('.ty-price-num').text().trim().replace('€', '').replace(',', '.')) + 0.2) * 1.1 + Number.EPSILON) * 10) / 10,
+      price: showedPrice,
       category,
       shop: "5ed2794fcb7cfe00177a14fa",
       image: object.public_url,
       producerName: domElement.find('.company-name').text().trim(),
       fromDrive: true,
-      description: ''
+      description: `Origine: France
+      ${getPriceUnit(domElement.find('.product-list-unit-price').text().trim(), showedPrice, domElement.find('.product-title').text().trim().match(/[+-]?\d+(?:\.\d+)?/g).map(Number)[0])}`
     };
   }
 
@@ -268,7 +284,7 @@ const getObjects = async (offset = 0, limit = 50, container_id = '5f8d55ec038155
     ];
 
     const excludeList = ["BLANQUETTE DE VEAU (FLANCHET) DISPO LE 02..."];
-    const allowedProducers = ["COLONEL KEF", "DOMAINE DE MOISMONT", "PARMENTIER FRANCIS", "MIELLERIE DE L'HALLUETTE", "FERME DES COLLINES", "GAEC SAINT GERARD"];
+    const allowedProducers = ["COLONEL KEF", "DOMAINE DE MOISMONT", "PARMENTIER FRANCIS", "MIELLERIE DE L'HALLUETTE", "FERME DES COLLINES"];
 
     objects = await getObjects(0);
     console.log(objects.length);

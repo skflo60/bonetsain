@@ -18,7 +18,13 @@ exports.getSession = async (req, res, next) => {
   const cart = order.cart || [];
   const groupedCart = groupBy(order.cart, 'shop');
   const shops = Object.keys(groupedCart);
-  const total_brut = Number(cart.map(c=>c.subtotal).reduce((acc, val) => acc + val).toFixed(2));
+  let total_brut = Number(cart.map(c=>c.subtotal).reduce((acc, val) => acc + val).toFixed(2));
+  if (order.pourboires) {
+    total_brut = total_brut + Number(order.pourboires.length);
+  }
+  if (order.coupon) {
+    total_brut = total_brut - Number(order.coupon.amount_off);
+  }
   const amount = Math.round((total_brut + DELIVERY_COST)*100);
   const test = order.name === 'test';
   (async () => {

@@ -1,4 +1,4 @@
-const { getDifferentTimes, getTimes } = require('../api/time/time.service');
+const { getDifferentTimes, getTimes, isShopOpen } = require('../api/time/time.service');
 const moment = require('moment');
 
 test('it should return 11h because there are 2 orders before', () => {
@@ -153,4 +153,17 @@ test('it should return 30/03 16:00 when params are a shop opened 7/7 8h => 18h a
   const times = getDifferentTimes(now, shopsTimes, deliveryMenTimes, unavailableTimes, duration);
   expect(times[0].date).toBe('30/03');
   expect(times[0].time).toBe('16:00');
+});
+
+
+test('it should say if the shop is open', () => {
+  const shopDays = { saturday: [{isOpen: true, open: "0800", close: "1700" }]}
+  const isOpen = isShopOpen(shopDays, new Date('2020-05-09T15:24:00'));
+  expect(isOpen).toBe(true);
+});
+
+test('it should say if the shop is close', () => {
+  const shopDays = { saturday: [{isOpen: true, open: "0800", close: "2000" }]}
+  const isOpen = isShopOpen(shopDays, new Date('2020-05-09T20:58:00'));
+  expect(isOpen).toBe(false);
 });
