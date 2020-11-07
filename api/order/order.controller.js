@@ -78,7 +78,7 @@ exports.validate = async (req, res, next) => {
                 let content = `<div>Bonjour !</div>
                 <br />
                 <div>Votre commande est confirmée</b>
-                <div>${order.cart.map(p=>p.name).join(', ')}</div>
+                <div>${result.cart.map(p=>p.name).join(', ')}</div>
                 <br />
                 <div>Les produits seront rassemblés chez les producteurs puis livrés le</div>
                 <div>Résumé de la commande : <a href="https://www.localfrais.fr/order/${result._id}">Lien vers la commande</a>
@@ -87,7 +87,7 @@ exports.validate = async (req, res, next) => {
                 <br />
                 <div>Florian de l'équipe Local & Frais 🥕</div>
                 <div>https://localfrais.fr</div>
-                <div>06 33 79 85 91</div>`
+                <div>06 33 79 85 91</div>`;
               }
           );
       break;
