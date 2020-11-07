@@ -5,7 +5,7 @@ const User = require('../user/user.model');
 const Shop = require('../shop/shop.model');
 const moment = require('moment');
 
-let ACCEPTABLE_DISTANCE = 8000
+let ACCEPTABLE_DISTANCE = 6000
 
 const sendMail = require('../utils/mail.service')
 
@@ -51,13 +51,13 @@ exports.validate = async (req, res, next) => {
 
   let event = null;
 
-  try {
+  /**try {
     event = stripe.webhooks.constructEvent(body, sig, "whsec_nqawI5DYgkdDqMbXFLlixxKBHHXasTF1");
   } catch (err) {
     // invalid signature
     res.status(400).json(err);
     return;
-  }
+  }**/
 
   let intent = null;
   switch (event['type']) {
@@ -75,6 +75,19 @@ exports.validate = async (req, res, next) => {
                   { state: 'paid', isPaid: true, email: customer.email, name: customer.name },
                   { multi: true });
                 };
+                let content = `<div>Bonjour !</div>
+                <br />
+                <div>Votre commande est confirmée</b>
+                <div>${order.cart.map(p=>p.name).join(', ')}</div>
+                <br />
+                <div>Les produits seront rassemblés chez les producteurs puis livrés le</div>
+                <div>Résumé de la commande : <a href="https://www.localfrais.fr/order/${result._id}">Lien vers la commande</a>
+                <br />
+                <div>Bonne journée 🙂</div>
+                <br />
+                <div>Florian de l'équipe Local & Frais 🥕</div>
+                <div>https://localfrais.fr</div>
+                <div>06 33 79 85 91</div>`
               }
           );
       break;
@@ -122,7 +135,7 @@ exports.isDeliveryPossible = async (req, res, next) => {
     let lat = parseFloat(req.body.validatedAddress.lat)
     let lng = parseFloat(req.body.validatedAddress.lng)
     const shop = await Shop.findOne({ _id: req.body.shopId }).lean();
-    ACCEPTABLE_DISTANCE = (shop.specialty === 'restaurant') ? 2000 : 8000;
+    ACCEPTABLE_DISTANCE = (shop.specialty === 'restaurant') ? 2000 : 6000;
     const deliveryMenNearUser = await User.aggregate([{
       $geoNear: {
         near: { type: "Point", coordinates: [ lng, lat ] },
