@@ -5,7 +5,7 @@ const User = require('../user/user.model');
 const Shop = require('../shop/shop.model');
 const moment = require('moment');
 
-let ACCEPTABLE_DISTANCE = 5000
+let ACCEPTABLE_DISTANCE = 5500
 
 const sendMail = require('../utils/mail.service')
 
@@ -119,7 +119,7 @@ exports.isDeliveryPossible = async (req, res, next) => {
     let lat = parseFloat(req.body.validatedAddress.lat)
     let lng = parseFloat(req.body.validatedAddress.lng)
     const shop = await Shop.findOne({ _id: req.body.shopId }).lean();
-    ACCEPTABLE_DISTANCE = (shop.specialty === 'restaurant') ? 1500 : 5000;
+    ACCEPTABLE_DISTANCE = (shop.specialty === 'restaurant') ? 1500 : 5500;
     const deliveryMenNearUser = await User.aggregate([{
       $geoNear: {
         near: { type: "Point", coordinates: [ lng, lat ] },
