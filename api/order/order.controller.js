@@ -5,7 +5,7 @@ const User = require('../user/user.model');
 const Shop = require('../shop/shop.model');
 const moment = require('moment');
 
-let ACCEPTABLE_DISTANCE = 6000
+let ACCEPTABLE_DISTANCE = 5000
 
 const sendMail = require('../utils/mail.service')
 
@@ -75,19 +75,6 @@ exports.validate = async (req, res, next) => {
                   { state: 'paid', isPaid: true, email: customer.email, name: customer.name },
                   { multi: true });
                 };
-                let content = `<div>Bonjour !</div>
-                <br />
-                <div>Votre commande est confirmée</b>
-                <div>${result.cart.map(p=>p.name).join(', ')}</div>
-                <br />
-                <div>Les produits seront rassemblés chez les producteurs puis livrés le</div>
-                <div>Résumé de la commande : <a href="https://www.localfrais.fr/order/${result._id}">Lien vers la commande</a>
-                <br />
-                <div>Bonne journée 🙂</div>
-                <br />
-                <div>Florian de l'équipe Local & Frais 🥕</div>
-                <div>https://localfrais.fr</div>
-                <div>06 33 79 85 91</div>`;
               }
           );
       break;
@@ -105,23 +92,20 @@ exports.update = async (req, res, next) => {
   try {
     const order = await Order.findByIdAndUpdate(req.params.id, req.body, {new:true});
     if (order.state === 'ready') {
-      let content = `<div>Bonjour ${order.name||''}</div>
-      <strong>Le producteur vient de confirmer qu'il a terminé la préparation de votre commande :</strong>
-      <div>${order.cart.map(p=>p.name).join(', ')}</div>
-      <div>Vous pourrez venir la chercher quand vous le souhaitez sur les horaires d'ouverture :</div>
-      <a href="https://localfrais.fr/shop/${order.shop}">Voir les horaires du producteur</a>
+      let content = `<div>Bonjour !</div>
       <br />
-      <img width="100" src='https://localfrais.fr/legumes.jpg' />
-      <div>L'équipe Local & Frais</div>`
-      if (order.deliveryMan && order.deliveryEmail) {
-        // For delivery man
-        content = content + `
-        <div>Date et heure de livraison souhaitée : ${moment(order.selectedTime).format("dddd DD MMMM YYYY [à] HH[h]mm")}</div>
-        <div><a href="https://maps.google.com/?q=${encodeURIComponent(order.foundAddress.label)}">${order.foundAddress.label || order.address}</div>`
-        sendMail(order.deliveryEmail, order.cart, order, content, subject = 'Une commande est prête à être livrée')
-      } else {
-        sendMail(order.email, order.cart, order, content, subject = 'Votre commande est prête')
-      }
+      <div>Votre commande est confirmée</b>
+      <div>${order.cart.map(p=>p.name).join(', ')}</div>
+      <br />
+      <div>Les produits seront rassemblés chez les producteurs puis livrés le ${moment(order.selectedTime).format("dddd DD MMMM YYYY [à] HH[h]mm")}</div>
+      <div>Résumé de la commande : <a href="https://www.localfrais.fr/order/${order._id}">Lien vers la commande</a>
+      <br />
+      <div>Bonne journée 🙂</div>
+      <br />
+      <div>Florian de l'équipe Local & Frais 🥕</div>
+      <div>https://localfrais.fr</div>
+      <div>06 33 79 85 91</div>`;
+      sendMail(order.email, order.cart, order, content, subject = 'Votre commande est confirmée')
     }
     res.json({ order });
   } catch (error) {
@@ -135,7 +119,7 @@ exports.isDeliveryPossible = async (req, res, next) => {
     let lat = parseFloat(req.body.validatedAddress.lat)
     let lng = parseFloat(req.body.validatedAddress.lng)
     const shop = await Shop.findOne({ _id: req.body.shopId }).lean();
-    ACCEPTABLE_DISTANCE = (shop.specialty === 'restaurant') ? 2000 : 6000;
+    ACCEPTABLE_DISTANCE = (shop.specialty === 'restaurant') ? 1500 : 5000;
     const deliveryMenNearUser = await User.aggregate([{
       $geoNear: {
         near: { type: "Point", coordinates: [ lng, lat ] },
