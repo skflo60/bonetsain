@@ -60,73 +60,84 @@ exports.validate = async (req, res, next) => {
   }
 
   let intent = null;
+  let customer = null;
   intent = event.data.object;
-  const customer = await stripe.customers.retrieve(intent.customer);
+  if (intent.customer) {
+    customer = await stripe.customers.retrieve(intent.customer);
+  }
   const sessions = await stripe.checkout.sessions.list({ payment_intent: intent.id });
   const session = sessions.data[0];
-  var result = await Order.update(
-    { session_id: session.id },
-    { state: event.type, isPaid: event.type==='payment_intent.succeeded', email: customer.email, name: customer.name },
-    { multi: true });
-
-  res.sendStatus(200);
-};
-
-exports.update = async (req, res, next) => {
-  try {
-    const order = await Order.findByIdAndUpdate(req.params.id, req.body, {new:true});
-    if (order.state === 'ready') {
-      let content = `<div>Bonjour !</div>
-      <br />
-      <div>Votre commande est confirmée</b>
-      <div>${order.cart.map(p=>p.name).join(', ')}</div>
-      <br />
-      <div>Les produits seront rassemblés chez les producteurs puis livrés le ${moment(order.selectedTime).format("dddd DD MMMM YYYY [à] HH[h]mm")}</div>
-      <div>Résumé de la commande : <a href="https://www.localfrais.fr/order/${order._id}">Lien vers la commande</a>
-      <br />
-      <div>Bonne journée 🙂</div>
-      <br />
-      <div>Florian de l'équipe Local & Frais 🥕</div>
-      <div>https://localfrais.fr</div>
-      <div>06 33 79 85 91</div>`;
-      sendMail(order.email, order.cart, order, content, subject = 'Votre commande est confirmée')
-    }
-    res.json({ order });
-  } catch (error) {
-    console.log(error);
-    res.status(500).json(error);
-  }
-};
-
-exports.isDeliveryPossible = async (req, res, next) => {
-  try {
-    let lat = parseFloat(req.body.validatedAddress.lat)
-    let lng = parseFloat(req.body.validatedAddress.lng)
-    const shop = await Shop.findOne({ _id: req.body.shopId }).lean();
-    ACCEPTABLE_DISTANCE = (shop.specialty === 'restaurant') ? 1500 : 5750;
-    const deliveryMenNearUser = await User.aggregate([{
-      $geoNear: {
-        near: { type: "Point", coordinates: [ lng, lat ] },
-        key: "location",
-        maxDistance: ACCEPTABLE_DISTANCE,
-        minDistance: 1,
-        query: { type: 'deliveryman', specialty: shop.specialty },
-        distanceField: "dist.calculated"
+  var result;
+  if (customer) {
+    result  = await Order.update(
+      { session_id: session.id },
+      { state: event.type, isPaid: event.type==='payment_intent.succeeded', email: customer.email, name: customer.name },
+      { multi: true });
+    } else {
+      result = await Order.update(
+        { session_id: session.id },
+        { state: event.type, isPaid: event.type==='payment_intent.succeeded' },
+        { multi: true });
       }
-    }])
-    const deliveryMenNearShop = await User.aggregate([{
-      $geoNear: {
-        near: shop.location,
-        key: "location",
-        maxDistance: ACCEPTABLE_DISTANCE,
-        query: { type: 'deliveryman', specialty: shop.specialty },
-        distanceField: "dist.calculated"
+
+      res.sendStatus(200);
+    };
+
+    exports.update = async (req, res, next) => {
+      try {
+        const order = await Order.findByIdAndUpdate(req.params.id, req.body, {new:true});
+        if (order.state === 'ready') {
+          let content = `<div>Bonjour !</div>
+          <br />
+          <div>Votre commande est confirmée</b>
+          <div>${order.cart.map(p=>p.name).join(', ')}</div>
+          <br />
+          <div>Les produits seront rassemblés chez les producteurs puis livrés le ${moment(order.selectedTime).format("dddd DD MMMM YYYY [à] HH[h]mm")}</div>
+          <div>Résumé de la commande : <a href="https://www.localfrais.fr/order/${order._id}">Lien vers la commande</a>
+          <br />
+          <div>Bonne journée 🙂</div>
+          <br />
+          <div>Florian de l'équipe Local & Frais 🥕</div>
+          <div>https://localfrais.fr</div>
+          <div>06 33 79 85 91</div>`;
+          sendMail(order.email, order.cart, order, content, subject = 'Votre commande est confirmée')
+        }
+        res.json({ order });
+      } catch (error) {
+        console.log(error);
+        res.status(500).json(error);
       }
-    }])
-    var deliveryMen = deliveryMenNearUser.filter(n => !deliveryMenNearShop.some(n2 => n._id == n2._id));
-    res.json({ result: deliveryMen.length, deliveryMen });
-  } catch (error) {
-    console.log(error)
-    res.status(500).json(error);
-  }
-};
+    };
+
+    exports.isDeliveryPossible = async (req, res, next) => {
+      try {
+        let lat = parseFloat(req.body.validatedAddress.lat)
+        let lng = parseFloat(req.body.validatedAddress.lng)
+        const shop = await Shop.findOne({ _id: req.body.shopId }).lean();
+        ACCEPTABLE_DISTANCE = (shop.specialty === 'restaurant') ? 1500 : 5750;
+        const deliveryMenNearUser = await User.aggregate([{
+          $geoNear: {
+            near: { type: "Point", coordinates: [ lng, lat ] },
+            key: "location",
+            maxDistance: ACCEPTABLE_DISTANCE,
+            minDistance: 1,
+            query: { type: 'deliveryman', specialty: shop.specialty },
+            distanceField: "dist.calculated"
+          }
+        }])
+        const deliveryMenNearShop = await User.aggregate([{
+          $geoNear: {
+            near: shop.location,
+            key: "location",
+            maxDistance: ACCEPTABLE_DISTANCE,
+            query: { type: 'deliveryman', specialty: shop.specialty },
+            distanceField: "dist.calculated"
+          }
+        }])
+        var deliveryMen = deliveryMenNearUser.filter(n => !deliveryMenNearShop.some(n2 => n._id == n2._id));
+        res.json({ result: deliveryMen.length, deliveryMen });
+      } catch (error) {
+        console.log(error)
+        res.status(500).json(error);
+      }
+    };
