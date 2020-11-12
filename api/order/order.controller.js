@@ -51,7 +51,7 @@ exports.validate = async (req, res, next) => {
 
   let event = body;
 
-  const stripe = new Stripe("sk_live_rryVAVPqJT1a9ht6dem4rj0b00Np5bPUzp");
+  const stripe = new Stripe(process.env.stripe_key);
 
   try {
     event = stripe.webhooks.constructEvent(body, sig, "whsec_nqawI5DYgkdDqMbXFLlixxKBHHXasTF1");
