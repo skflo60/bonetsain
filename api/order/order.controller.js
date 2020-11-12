@@ -1,11 +1,11 @@
-const stripe = require('stripe')(process.env.stripe_key);
+const Stripe = require('stripe');
 
 const Order = require('./order.model');
 const User = require('../user/user.model');
 const Shop = require('../shop/shop.model');
 const moment = require('moment');
 
-let ACCEPTABLE_DISTANCE = 5500
+let ACCEPTABLE_DISTANCE = 5750
 
 const sendMail = require('../utils/mail.service')
 
@@ -49,41 +49,25 @@ exports.validate = async (req, res, next) => {
   const sig = req.headers['stripe-signature'];
   const body = req.rawBody || req.body;
 
-  let event = null;
+  let event = body;
 
-  /**try {
+  const stripe = new Stripe("sk_live_rryVAVPqJT1a9ht6dem4rj0b00Np5bPUzp");
+
+  try {
     event = stripe.webhooks.constructEvent(body, sig, "whsec_nqawI5DYgkdDqMbXFLlixxKBHHXasTF1");
   } catch (err) {
-    // invalid signature
-    res.status(400).json(err);
-    return;
-  }**/
+    console.log(err);
+  }
 
   let intent = null;
-  switch (event['type']) {
-    case 'payment_intent.succeeded':
-      intent = event.data.object;
-      // TODO set order to paid
-      console.log("Succeeded:", intent.id);
-      stripe.paymentIntents.retrieve(
-          intent.id,
-          async function(err, paymentIntent) {
-            if (paymentIntent) {
-                const customer = await stripe.customers.retrieve(session.customer);
-                var result = await Order.update(
-                  { session_id: session.id },
-                  { state: 'paid', isPaid: true, email: customer.email, name: customer.name },
-                  { multi: true });
-                };
-              }
-          );
-      break;
-    case 'payment_intent.payment_failed':
-      intent = event.data.object;
-      const message = intent.last_payment_error && intent.last_payment_error.message;
-      console.log('Failed:', intent.id, message);
-      break;
-  }
+  intent = event.data.object;
+  const customer = await stripe.customers.retrieve(intent.customer);
+  const sessions = await stripe.checkout.sessions.list({ payment_intent: intent.id });
+  const session = sessions.data[0];
+  var result = await Order.update(
+    { session_id: session.id },
+    { state: event.type, isPaid: event.type==='payment_intent.succeeded', email: customer.email, name: customer.name },
+    { multi: true });
 
   res.sendStatus(200);
 };
@@ -119,7 +103,7 @@ exports.isDeliveryPossible = async (req, res, next) => {
     let lat = parseFloat(req.body.validatedAddress.lat)
     let lng = parseFloat(req.body.validatedAddress.lng)
     const shop = await Shop.findOne({ _id: req.body.shopId }).lean();
-    ACCEPTABLE_DISTANCE = (shop.specialty === 'restaurant') ? 1500 : 5500;
+    ACCEPTABLE_DISTANCE = (shop.specialty === 'restaurant') ? 1500 : 5750;
     const deliveryMenNearUser = await User.aggregate([{
       $geoNear: {
         near: { type: "Point", coordinates: [ lng, lat ] },
