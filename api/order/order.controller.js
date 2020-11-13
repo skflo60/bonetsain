@@ -21,6 +21,17 @@ exports.findAll = async (req, res, next) => {
     if (req.query.email) {
       filters.email = req.query.email;
     }
+    if (req.query.deliveryEmail) {
+      var date = new Date();
+      date.setHours(0,0,0);
+      const minDate = new Date(date);
+      date.setHours(23,59,59);
+      const maxDate = new Date(date);
+      filters.deliveryEmail = req.query.deliveryEmail;
+      filters.selectedTime = { $gte: minDate, $lte: maxDate };
+      filters.state = { $in: ['paid', 'payment_intent.succeeded'] };
+    }
+    console.log(filters);
     const orders = await Order.paginate(
       filters,
       { page: page, limit: pagesize, sort: {createdAt: -1} }
