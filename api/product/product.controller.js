@@ -152,7 +152,6 @@ exports.remove = async (req, res, next) => {
 exports.create = async (req, res, next) => {
   try {
     const createdProduct = req.body;
-    console.log('creating product', createdProduct);
     const product = await Product.create(createdProduct);
     res.json(product)
   } catch (error) {
