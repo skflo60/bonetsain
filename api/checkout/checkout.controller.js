@@ -105,3 +105,41 @@ exports.verifySession = async (req, res, next) => {
       }
     );
   };
+
+
+  exports.getSubscription = async (req, res, next) => {
+    const order = req.body;
+    const test = order.name === 'test';
+    (async () => {
+      const stripe_key = test ? 'sk_test_WkZb6QtYaD3nzlVSxbIFXXhQ00Txor8IU5' : process.env.stripe_key;
+      const stripe = new Stripe(stripe_key);
+      try {
+        const session = await stripe.checkout.sessions.create({
+          mode: "subscription",
+          payment_method_types: ["card"],
+          customer_email: order.email,
+          line_items: [
+            {
+              price: test ? 'price_1HstYrFLwAlHpcllhBvp9y96' : 'price_1HTuSVFLwAlHpclld9O8XXaA',
+              // For metered billing, do not pass quantity
+              quantity: 1,
+            },
+          ],
+          success_url: `https://localfrais.fr/payment?session_id={CHECKOUT_SESSION_ID}${(test ? '&test=true' : '')}`,
+          cancel_url: 'https://localfrais.fr/checkout'
+        });
+        order.session_id = session.id;
+        order.subscription = true;
+        order.state = 'waiting';
+        const createdOrder = await Order.create(order);
+        res.json(session);
+      } catch (e) {
+        res.status(400);
+        return res.send({
+          error: {
+            message: e.message,
+          }
+        });
+      }
+    })();
+  };

@@ -8,11 +8,10 @@ moment.locale('fr');
 
 exports.findAll = async (req, res, next) => {
   try {
-    let shopsSet = Array.from(new Set(req.query.shops.split(",")));
-    let foundTimes = []
-    let tmpTimes = []
-    let deliveryMan = {}
-    console.log(shopsSet);
+    let shopsSet = req.query.shops ? Array.from(new Set(req.query.shops.split(","))) : ["5ed2794fcb7cfe00177a14fa"];
+    let foundTimes = [];
+    let tmpTimes = [];
+    let deliveryMan = {};
     // Shop times
     for (let i=0; i<shopsSet.length; i++) {
       const shop = shopsSet[i];

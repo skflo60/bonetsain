@@ -4,6 +4,7 @@ const Schema = mongoose.Schema;
 
 const OrderSchema = new Schema({
   reference: String,
+  subscription: Boolean,
   name: String,
   phone: String,
   email: String,
