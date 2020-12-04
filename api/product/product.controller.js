@@ -33,7 +33,7 @@ exports.findAll = async (req, res, next) => {
 
     const products = await Product.paginate(
       filters,
-      { page: page, offset, limit: pagesize, populate: 'producer', sort: { date: -1 } }
+      { page: page, offset, limit: pagesize, populate: { path: 'producer', select: '-image' }, sort: { date: -1 } }
     );
 
     res.status(200).json({
