@@ -284,7 +284,7 @@ const getObjects = async (offset = 0, limit = 50, container_id = '5f8d55ec038155
     ];
 
     const excludeList = ["BLANQUETTE DE VEAU (FLANCHET) DISPO LE 02..."];
-    const allowedProducers = ["COLONEL KEF", "DOMAINE DE MOISMONT", "PARMENTIER FRANCIS", "MIELLERIE DE L'HALLUETTE", "FERME DES COLLINES"];
+    const allowedProducers = ["PARMENTIER FRANCIS", "MIELLERIE DE L'HALLUETTE"];
 
     objects = await getObjects(0);
     console.log(objects.length);

@@ -22,7 +22,7 @@ exports.findAll = async (req, res, next) => {
 
       // Commandes en cours
       const orders = await Order.find({ shop, selectedTime: { $gte: new Date() }});
-      const unavailableTimes = []; // TODO limit to x orders by times // orders ? orders.map(o=>o.selectedTime) : [];
+      const unavailableTimes = ['2020-12-25 17:00', '2020-12-25 18:00', '2020-12-25 19:00', '2020-12-25 20:00', '2020-12-25 17:00', '2020-12-26 08:00', '2020-12-26 09:00', '2020-12-26 10:00', '2020-12-26 11:00']; // TODO limit to x orders by times // orders ? orders.map(o=>o.selectedTime) : [];
       const shopTimes = getDifferentTimes(moment(), [foundShop.openings], (foundShop.specialty==='restaurant'));
       const deliveryTimes = getDifferentTimes(moment(), [deliveryMan.availableTimes], (foundShop.specialty==='restaurant'));
       tmpTimes.push(getTimes(shopTimes, deliveryTimes, unavailableTimes))
