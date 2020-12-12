@@ -16,7 +16,9 @@ const getTranslation = (text) => {
   const translations = {
     "betterave": "Beet",
     "préparation": "Cookies",
-    "courge": "Squash"
+    "courge": "spaghetti squash",
+    "Pourpier": "purslane",
+    "Carottes": "Carrots"
   };
   return translations[text];
 };
@@ -276,7 +278,7 @@ const getObjects = async (offset = 0, limit = 50, container_id = '5f8d55ec038155
       { id: "5cd9d2e91c9d440000a9b251", url: "https://drivefermier-somme.fr/amiens/fruits-et-legumes/" },
       { id: "5f039104ceceb9b99d12ef45", url: "https://drivefermier-somme.fr/amiens/viandes-et-poissons/" },
       { id: "5f039104ceceb9b99d12ef45", url: "https://drivefermier-somme.fr/amiens/volailles-et-oeufs/" },
-      { id: "5f037fd2ceceb9b99d12ef44", url: "https://drivefermier-somme.fr/amiens/produits-laitiers/" },
+      { id: "5f039104ceceb9b99d12ef45", url: "https://drivefermier-somme.fr/amiens/produits-laitiers/" },
       { id: "5f037f9aceceb9b99d12ef42", url: "https://drivefermier-somme.fr/amiens/epicerie-sucree/" },
       { id: "5f037f9aceceb9b99d12ef42", url: "https://drivefermier-somme.fr/amiens/boulangerie-et-patisserie/" },
       { id: "5f037fb1ceceb9b99d12ef43", url: "https://drivefermier-somme.fr/amiens/epicerie-salee/" },
