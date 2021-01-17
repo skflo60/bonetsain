@@ -68,7 +68,7 @@ const createInvoice = async (order = {}) => {
 
   // Préparer sa facture
   var invoice_lines = order.cart.map(p => {
-    return { title: p.name, price_ht: p.subtotal, image: p.image };
+    return { title: p.name, price_ht: p.subtotal };
   });
   var invoice = { shipping_total_ht: 4.9, shipping_total_tva: 0, client_name: order.name, client_address: order.foundAddress.label, state: 'paid', invoice_lines };
 
