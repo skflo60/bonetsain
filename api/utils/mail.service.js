@@ -1,5 +1,6 @@
 "use strict";
 const nodemailer = require("nodemailer");
+const moment = require("moment");
 
 // async..await is not allowed in global scope, must use a wrapper
 async function sendMail(shopMail, cart = [], order = {}, content = null, subject = 'Nouvelle commande !') {

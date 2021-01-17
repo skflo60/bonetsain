@@ -1,4 +1,5 @@
 const Stripe = require('stripe');
+const request = require("superagent");
 
 const Order = require('./order.model');
 const User = require('../user/user.model');
@@ -56,6 +57,26 @@ exports.findById = async (req, res, next) => {
   }
 };
 
+const createInvoice = async (order = {}) => {
+  // Préparation des clés d'api
+  const API_URL = 'https://wuro.pro/api/v1/' // Url de base de l'api, Doc complète sur https://wuro.pro/api/v1/docs/#
+  const appId = '6004510881e89e7f3fd4074d' // Fourni avec votre espace Wuro > Paramètres > API
+  const appSecret = 'tulljrkl6vwzidnmv60cfujhn01sle' // Utilise l'espace test wuro.pro/posao
+
+  // Récupérer un token d'application
+  const { auth } = await request.get(`${API_URL}accessToken?app_id=${appId}&&app_secret=${appSecret}`);
+
+  // Préparer sa facture
+  const invoice_lines = order.cart.map(p => {
+    return { title: p.name, price_ht: p.subtotal, image: p.image };
+  });
+  const invoice = { client_name: order.name, client_address: order.foundAddress.label, state: 'paid', invoice_lines };
+
+  // Ajouter sa facture
+  const { body } = await request.post(API_URL + "invoice", invoice).set({ authorization: auth.token});
+  return body.new_invoice.pdf_link;
+}
+
 exports.validate = async (req, res, next) => {
   const sig = req.headers['stripe-signature'];
   const body = req.rawBody || req.body;
@@ -80,10 +101,27 @@ exports.validate = async (req, res, next) => {
   const session = sessions.data[0];
   var result;
   if (customer) {
-    result  = await Order.update(
+    // Find order by session id
+    const order = await Order.findOne({ session_id: session.id });
+    const invoiceUrl = await createInvoice(order)
+    result = await Order.update(
       { session_id: session.id },
-      { state: event.type, isPaid: event.type==='payment_intent.succeeded', email: customer.email, name: customer.name },
+      { state: event.type, isPaid: event.type==='payment_intent.succeeded', email: customer.email, invoice: invoiceUrl, name: customer.name },
       { multi: true });
+      let content = `<div>Bonjour !</div>
+      <br />
+      <div>Votre commande est confirmée</b>
+      <div>${order.cart.map(p=>p.name).join(', ')}</div>
+      <br />
+      <div>Les produits seront rassemblés chez les producteurs puis livrés le ${moment(order.selectedTime).format("dddd DD MMMM YYYY [à] HH[h]mm")}</div>
+      <div>Résumé de la commande : <a href="https://www.localfrais.fr/order/${order._id}">Lien vers la commande</a>
+      <br />
+      <div>Bonne journée 🙂</div>
+      <br />
+      <div>Florian de l'équipe Local & Frais 🥕</div>
+      <div>https://localfrais.fr</div>
+      <div>06 33 79 85 91</div>`;
+      sendMail(order.email, order.cart, order, content, subject = 'Votre commande est confirmée');
     } else {
       result = await Order.update(
         { session_id: session.id },

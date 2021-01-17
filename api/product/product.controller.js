@@ -3,6 +3,7 @@ const Product = require('./product.model');
 const Shop = require('../shop/shop.model');
 const request = require('superagent');
 const cheerio = require('cheerio');
+const { createObject, base64MimeType, isBase64 } = require('../utils/emstorage.service');
 
 exports.findAll = async (req, res, next) => {
   try {
@@ -30,6 +31,8 @@ exports.findAll = async (req, res, next) => {
     if (req.query.search && req.query.search !== '') {
       filters.name = { $regex : new RegExp(req.query.search, "i") };
     }
+
+    filters.active = { $ne: false };
 
     const products = await Product.paginate(
       filters,
@@ -104,7 +107,7 @@ exports.findRelated = async (req, res, next) => {
     if (product) {
       const productSize = 3;
       products = await Product.aggregate([
-        { $match: { category: product.category, shop: product.shop._id } },
+        { $match: { category: product.category, shop: product.shop._id, active: { $ne: false } } },
         { $sample: { size: productSize } }
       ]);
     }
@@ -130,10 +133,17 @@ exports.findById = async (req, res, next) => {
 exports.update = async (req, res, next) => {
   try {
     const updatedProduct = req.body;
+
+    // If image is base64 convert it to url
+    if (isBase64(updatedProduct.image)) {
+      const file = { name: updatedProduct.name + '_' + Math.random().toString(36).substr(2, 9), data: updatedProduct.image, mimetype: base64MimeType(updatedProduct.image)};
+      object = await createObject("5f8d55ec03815518b10a4700", file, {});
+      updatedProduct.image = "https://" + object.public_url;
+    }
     const product = await Product.update({_id: updatedProduct._id}, updatedProduct);
     res.json(updatedProduct)
   } catch (error) {
-    console.log(error)
+    console.log(error);
     res.status(500).json(error);
   }
 };

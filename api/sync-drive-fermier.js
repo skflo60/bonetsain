@@ -269,7 +269,8 @@ const getObjects = async (offset = 0, limit = 50, container_id = '5f8d55ec038155
       producerName: domElement.find('.company-name').text().trim(),
       fromDrive: true,
       description: `Origine: France
-      ${getPriceUnit(domElement.find('.product-list-unit-price').text().trim(), showedPrice, domElement.find('.product-title').text().trim().match(/[+-]?\d+(?:\.\d+)?/g).map(Number)[0])}`
+      ${getPriceUnit(domElement.find('.product-list-unit-price').text().trim(), showedPrice, domElement.find('.product-title').text().trim().match(/[+-]?\d+(?:\.\d+)?/g).map(Number)[0])}`,
+      active: true
     };
   }
 
@@ -285,7 +286,7 @@ const getObjects = async (offset = 0, limit = 50, container_id = '5f8d55ec038155
       { id: "5f65f3e487f96cd7362a9287", url: "https://drivefermier-somme.fr/amiens/boissons-et-alcools/" },
     ];
 
-    const excludeList = ["BLANQUETTE DE VEAU (FLANCHET) DISPO LE 02..."];
+    const excludeList = ["BLANQUETTE DE VEAU (FLANCHET) DISPO LE 02...", "Panier de légumes 10€ 1 unité(s)", "Panier de légumes 15€ 1 unité(s)"];
     const allowedProducers = ["PARMENTIER FRANCIS", "MIELLERIE DE L'HALLUETTE"];
 
     objects = await getObjects(0);
@@ -299,7 +300,7 @@ const getObjects = async (offset = 0, limit = 50, container_id = '5f8d55ec038155
         try {
           // TODO Delete old products
           // await Shop.deleteMany({ fromDrive: true });
-          await Product.deleteMany({ fromDrive: true });
+          await Product.updateMany({ fromDrive: true }, { active: false });
           // Clean EM objects
           console.log("1/4 -> Getting products for category " + categ.url.replace("https://drivefermier-somme.fr/amiens/", ""));
           request
@@ -347,13 +348,19 @@ const getObjects = async (offset = 0, limit = 50, container_id = '5f8d55ec038155
                 upsert: true // Make this update into an upsert
               });
               product.producer = producer;
-
-              // Insert Product If Does't exist
-              let doc = await Product.findOneAndUpdate({name: product.name}, product, {
-                new: true,
-                upsert: true // Make this update into an upsert
-              });
-              console.log("3/4 -> Upserting product", product.name, product.image);
+              let doc = null;
+              const foundProduct = await Product.findOneAndUpdate({name: product.name});
+              if (foundProduct) {
+                // Insert Product If Does't exist
+                doc = await Product.findOneAndUpdate({name: product.name}, product, {
+                  new: true,
+                  upsert: true // Make this update into an upsert
+                });
+                console.log("3/4 -> Updating product", product.name, product.image);
+              } else {
+                doc = await Product.create(product);
+                console.log("3/4 -> Adding product", product.name, product.image);
+              }
             });
             console.log("4/4 -> FINISH SUCCESS");
             // Return Sync Success

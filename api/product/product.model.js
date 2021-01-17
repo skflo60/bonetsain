@@ -17,7 +17,8 @@ const ProductSchema = new Schema({
   shop: { type: Schema.ObjectId, ref: 'Shop' },
   months: [Number],
   fromDrive: Boolean,
-  fromBox: Boolean
+  fromBox: Boolean,
+  active: Boolean
 }, { timestamps: true });
 
 ProductSchema.plugin(mongoosePaginate);

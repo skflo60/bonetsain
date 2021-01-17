@@ -2,6 +2,7 @@ const Shop = require('./shop.model');
 const getDayNumberFromName = require('../utils/helpers.service')
 const { isShopOpen } = require('../time/time.service')
 const mongoose = require('mongoose');
+const { createObject, base64MimeType, isBase64 } = require('../utils/emstorage.service');
 
 exports.findAll = async (req, res, next) => {
   try {
@@ -90,6 +91,14 @@ exports.findById = async (req, res, next) => {
 exports.updateProducer = async (req, res, next) => {
   try {
     const updatedShop = req.body;
+    // If image is base64 convert it to url
+    if (isBase64(updatedShop.image)) {
+      const file = { name: updatedShop.name + '_' + Math.random().toString(36).substr(2, 9), data: updatedShop.image, mimetype: base64MimeType(updatedShop.image)};
+      object = await createObject("5f8d55ec03815518b10a4700", file, {});
+      updatedShop.image = "https://" + object.public_url;
+    } else {
+      console.log("NOT BASE 64", updatedShop.image, "NOT BASE 64");
+    }
     const shop = await Shop.update({_id: updatedShop._id}, updatedShop);
     res.json(updatedShop)
   } catch (error) {
