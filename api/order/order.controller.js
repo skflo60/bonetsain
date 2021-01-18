@@ -70,6 +70,12 @@ const createInvoice = async (order = {}) => {
   var invoice_lines = order.cart.map(p => {
     return { title: p.name, price_ht: p.subtotal };
   });
+  if (order.pourboires && order.pourboires.length && order.pourboires.length > 0) {
+    invoice_lines.push({ title: "Pourboire", price_ht: 1 });
+  }
+  if (order.coupon && order.coupon.amount_off) {
+    invoice_lines.push({ title: "Bon de réduction", price_ht: -order.coupon.amount_off });
+  }
   var invoice = { shipping_total_ht: 4.9, shipping_total_tva: 0, client_name: order.name, client_address: order.foundAddress.label, state: 'paid', invoice_lines };
 
   // Ajouter sa facture

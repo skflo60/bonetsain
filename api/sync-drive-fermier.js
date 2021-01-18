@@ -18,7 +18,8 @@ const getTranslation = (text) => {
     "préparation": "Cookies",
     "courge": "spaghetti squash",
     "Pourpier": "purslane",
-    "Carottes": "Carrots"
+    "Carottes": "Carrots",
+    "Purslane": "Purslane"
   };
   return translations[text];
 };
@@ -262,6 +263,7 @@ const getObjects = async (offset = 0, limit = 50, container_id = '5f8d55ec038155
     const showedPrice = Math.round(((+(domElement.find('.ty-price-num').text().trim().replace('€', '').replace(',', '.')) + 0.2) * 1.1 + Number.EPSILON) * 10) / 10;
     return {
       name: mapName(domElement.find('.product-title').text().trim()),
+      reference: mapName(domElement.find('.product-title').text().trim()),
       price: showedPrice,
       category,
       shop: "5ed2794fcb7cfe00177a14fa",
@@ -299,7 +301,7 @@ const getObjects = async (offset = 0, limit = 50, container_id = '5f8d55ec038155
       await asyncForEach(categs, async categ => {
         try {
           // TODO Delete old products
-          // await Shop.deleteMany({ fromDrive: true });
+          //await Product.deleteMany({ fromDrive: true });
           await Product.updateMany({ fromDrive: true }, { active: false });
           // Clean EM objects
           console.log("1/4 -> Getting products for category " + categ.url.replace("https://drivefermier-somme.fr/amiens/", ""));
@@ -349,12 +351,12 @@ const getObjects = async (offset = 0, limit = 50, container_id = '5f8d55ec038155
               });
               product.producer = producer;
               let doc = null;
-              const foundProduct = await Product.findOneAndUpdate({name: product.name});
+              product.active = true;
+              const foundProduct = await Product.findOne({reference: product.name});
               if (foundProduct) {
                 // Insert Product If Does't exist
-                doc = await Product.findOneAndUpdate({name: product.name}, product, {
-                  new: true,
-                  upsert: true // Make this update into an upsert
+                doc = await Product.findOneAndUpdate({ reference: product.name }, { active: true }, {
+                  new: true
                 });
                 console.log("3/4 -> Updating product", product.name, product.image);
               } else {
