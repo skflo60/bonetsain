@@ -13,7 +13,6 @@ const getEMStorageHeaders = (VERB =	"GET", URI = "/objects/:container_id/:object
   return headers
 }
 
-
 function base64MimeType(encoded) {
   var result = null;
 

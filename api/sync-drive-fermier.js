@@ -288,7 +288,7 @@ const getObjects = async (offset = 0, limit = 50, container_id = '5f8d55ec038155
       { id: "5f65f3e487f96cd7362a9287", url: "https://drivefermier-somme.fr/amiens/boissons-et-alcools/" },
     ];
 
-    const excludeList = ["BLANQUETTE DE VEAU (FLANCHET) DISPO LE 02...", "Panier de légumes 10€ 1 unité(s)", "Panier de légumes 15€ 1 unité(s)"];
+    const excludeList = ["Betterave cuite 0.5 kg", "BLANQUETTE DE VEAU (FLANCHET) DISPO LE 02...", "Panier de légumes 10€ 1 unité(s)", "Panier de légumes 15€ 1 unité(s)"];
     const allowedProducers = ["PARMENTIER FRANCIS", "MIELLERIE DE L'HALLUETTE"];
 
     objects = await getObjects(0);
