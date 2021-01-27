@@ -76,7 +76,7 @@ const createInvoice = async (order = {}) => {
   if (order.coupon && order.coupon.amount_off) {
     invoice_lines.push({ title: "Bon de réduction", price_ht: -order.coupon.amount_off });
   }
-  var invoice = { shipping_total_ht: 4.9, shipping_total_tva: 0, client_name: order.name, client_address: order.foundAddress.label, state: 'paid', invoice_lines };
+  var invoice = { shipping_total_ht: Number(4.9), shipping_tva_rate: Number(0), client_name: order.name, client_address: order.foundAddress.label, state: 'paid', invoice_lines };
 
   // Ajouter sa facture
   var result = await request.post(API_URL + "invoice", invoice).set({ authorization: resp.body.token});
@@ -111,7 +111,7 @@ exports.validate = async (req, res, next) => {
     const order = await Order.findOne({ session_id: session.id });
     try {
       const invoiceUrl = await createInvoice(order)
-      result = await Order.update(
+      result = await Order.updateOne(
         { session_id: session.id },
         { state: event.type, isPaid: event.type==='payment_intent.succeeded', email: customer.email, invoice: invoiceUrl, name: customer.name },
         { multi: true });
