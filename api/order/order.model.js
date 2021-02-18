@@ -24,6 +24,7 @@ const OrderSchema = new Schema({
   pourboires: Array,
   invoice: String,
   deliveryEmail: String,
+  alcohol: Boolean,
   session_id: String, // Stripe session id
   state: String,
   isPaid: Boolean,

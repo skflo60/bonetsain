@@ -32,7 +32,6 @@ exports.findAll = async (req, res, next) => {
       filters.selectedTime = { $gte: minDate, $lte: maxDate };
       filters.state = { $in: ['paid', 'payment_intent.succeeded'] };
     }
-    console.log(filters);
     const orders = await Order.paginate(
       filters,
       { page: page, limit: pagesize, sort: {createdAt: -1} }
@@ -68,7 +67,7 @@ const createInvoice = async (order = {}) => {
 
   // Préparer sa facture
   var invoice_lines = order.cart.map(p => {
-    return { title: p.name, price_ht: p.subtotal };
+    return { title: p.name, quantity: p.qty, unit: p.unit, price_ht: p.price };
   });
   if (order.pourboires && order.pourboires.length && order.pourboires.length > 0) {
     invoice_lines.push({ title: "Pourboire", price_ht: 1 });

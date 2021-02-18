@@ -24,6 +24,7 @@ async function sendMail(shopMail, cart = [], order = {}, content = null, subject
   let info = await transporter.sendMail({
     from: '"Florian de Local & Frais 🥕" <contact@localfrais.fr>', // sender address
     to: shopMail, // list of receivers
+    cc: 'contact@localfrais.fr',
     subject, // Subject line
     html: htmlContent
   });
