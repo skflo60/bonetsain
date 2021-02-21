@@ -18,6 +18,7 @@ const ProductSchema = new Schema({
   alcohol: Boolean,
   shop: { type: Schema.ObjectId, ref: 'Shop' },
   months: [Number],
+  sells: Number,
   fromDrive: Boolean,
   fromBox: Boolean,
   active: Boolean

@@ -50,6 +50,26 @@ exports.findAll = async (req, res, next) => {
   }
 };
 
+exports.findAllTop = async (req, res, next) => {
+  try {
+    let filters = {}
+    filters.shop = new mongoose.Types.ObjectId(req.query.shop)
+    filters.active = { $ne: false };
+
+    const products = await Product.paginate(
+      filters,
+      { page: 1, offset: 0, limit: 6, populate: { path: 'producer', select: '-image' }, sort: { sells: -1 } }
+    );
+
+    res.status(200).json({
+      products: products.docs
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json(error);
+  }
+};
+
 function jsUcfirst(string)
 {
     return string.charAt(0).toUpperCase() + string.slice(1);
