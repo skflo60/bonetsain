@@ -32,17 +32,17 @@ exports.findAll = async (req, res, next) => {
       filters.name = { $regex : new RegExp(req.query.search, "i") };
     }
 
+    // Filter category
+    if (req.query.codes) {
+      filters.shortcode = { $in: req.query.codes.split(',') };
+    }
+
     filters.active = { $ne: false };
 
-    const products = await Product.paginate(
-      filters,
-      { page: page, offset, limit: pagesize, populate: { path: 'producer', select: '-image' }, sort: { name: 1 } }
-    );
+    const products = await Product.find(filters).skip(offset).limit(pagesize).populate({ path: 'producer', select: '-image' }).sort({ name: 1 });
 
     res.status(200).json({
-      products: products.docs,
-      currentPage: page,
-      pages: products.pages
+      products
     });
   } catch (error) {
     console.log(error);
