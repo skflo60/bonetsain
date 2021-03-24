@@ -68,6 +68,43 @@ module.exports = {
       user: updatedUser
     });
   },
+  createShop: async (req, res, next) => {
+    try {
+      const { color, name, email, address } = req.body;
+      const password = [...Array(30)].map(() => Math.random().toString(36)[3]).join('');
+
+      const existingShop = await User.findOne({ email });
+      if (existingShop) {
+         res.status(400).json("Shop déjà pris")
+      }
+
+      const shop = new Shop({
+        name,
+        email,
+        city: address
+      });
+
+      const persistedShop = await shop.save();
+
+      let user = await User.findOne({ username: email });
+      if (!user) {
+        user = new User({
+          email,
+          password,
+          shop: persistedShop._id
+        });
+
+        const persistedUser = await user.save();
+      }
+
+      res.status(201).json({
+        shop: persistedShop,
+        success: true
+      });
+    } catch (error) {
+      res.status(500).json(error);
+    }
+  },
   signup: async (req, res, next) => {
     try {
       const { username, password, email, name, validatedAddress } = req.body;
@@ -77,33 +114,33 @@ module.exports = {
 
       if (!user) {
         /** const shop = new Shop({
-          name,
-          email,
-          address: validatedAddress.properties.name,
-          postalCode: validatedAddress.properties.postcode,
-          city: validatedAddress.properties.city,
-          location: validatedAddress.geometry
-        });
+        name,
+        email,
+        address: validatedAddress.properties.name,
+        postalCode: validatedAddress.properties.postcode,
+        city: validatedAddress.properties.city,
+        location: validatedAddress.geometry
+      });
 
-        const persistedShop = await shop.save();
-        */
-        const user = new User({
-          username,
-          password: hash,
-          location: validatedAddress.geometry
-        });
+      const persistedShop = await shop.save();
+      */
+      const user = new User({
+        username,
+        password: hash,
+        location: validatedAddress.geometry
+      });
 
-        const persistedUser = await user.save();
+      const persistedUser = await user.save();
 
-        res.status(201).json({
-          user,
-          success: true
-        });
-      } else {
-        res.status(400).json("Login déjà pris")
-      }
-    } catch (error) {
-      res.status(500).json(error);
+      res.status(201).json({
+        user,
+        success: true
+      });
+    } else {
+      res.status(400).json("Login déjà pris")
     }
+  } catch (error) {
+    res.status(500).json(error);
   }
+}
 };

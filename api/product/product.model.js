@@ -8,6 +8,7 @@ const ProductSchema = new Schema({
   shortcode: String,
   basePrice: Number,
   price: Number,
+  costPrice: Number,
   quantity: Number,
   unit: String,
   stock: Number,

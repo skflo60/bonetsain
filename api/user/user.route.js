@@ -5,6 +5,7 @@ const userController = require('./user.controller');
 router.route('/login').post(userController.login);
 router.route('/logout').post(userController.logout);
 router.route('/signup').post(userController.signup);
+router.route('/shop').post(userController.createShop);
 router.route('/login').get(userController.getUserByLogin);
 router.route('/:id').post(userController.update);
 
