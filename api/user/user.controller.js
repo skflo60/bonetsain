@@ -1,6 +1,7 @@
 const bcrypt = require('bcrypt');
 const User = require('./user.model');
 const Shop = require('../shop/shop.model');
+const Product = require('../product/product.model');
 const getWeekNumberFromName = require('../utils/helpers.service')
 const saltRounds = 10;
 
@@ -70,38 +71,52 @@ module.exports = {
   },
   createShop: async (req, res, next) => {
     try {
-      const { color, name, email, address } = req.body;
+      const { color, name, email, address, location, product } = req.body;
       const password = [...Array(30)].map(() => Math.random().toString(36)[3]).join('');
 
       const existingShop = await User.findOne({ email });
       if (existingShop) {
-         res.status(400).json("Shop déjà pris")
+        res.status(400).json("Shop déjà pris")
+      }
+
+      if (!location) {
+        location = [0, 0];
       }
 
       const shop = new Shop({
         name,
         email,
-        city: address
+        color,
+        city: address,
+        location: { type: "Point", coordinates: location }
       });
+
 
       const persistedShop = await shop.save();
 
       let user = await User.findOne({ username: email });
       if (!user) {
         user = new User({
+          username: email,
           email,
           password,
+          location: { type: "Point", coordinates: location },
           shop: persistedShop._id
         });
 
         const persistedUser = await user.save();
       }
 
+      product.shop = persistedShop._id;
+
+      await Product.create(product);
+
       res.status(201).json({
         shop: persistedShop,
         success: true
       });
     } catch (error) {
+      console.log(error);
       res.status(500).json(error);
     }
   },
