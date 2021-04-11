@@ -26,6 +26,7 @@ const ShopSchema = new Schema({
   orderable: { type: Boolean, default: true },
   days: { monday: {}, tuesday: {}, wednesday: {}, thursday: {}, friday: {}, saturday: {}, sunday: {} },
   openings: [{weekday: Number, start: String, end: String}],
+  slotDuration: { type: Number, default: 60 },
   affiliatedShop: { type: Schema.ObjectId, ref: 'Shop' },
   specialty: String, // restaurant, epicerie
   fromDrive: Boolean,

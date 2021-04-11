@@ -121,6 +121,13 @@ exports.update = async (req, res, next) => {
       })
     });
 
+    // If image is base64 convert it to url
+    if (isBase64(updatedShop.image)) {
+      const file = { name: updatedShop.name + '_' + Math.random().toString(36).substr(2, 9), data: updatedShop.image, mimetype: base64MimeType(updatedShop.image)};
+      object = await createObject("5f8d55ec03815518b10a4700", file, {});
+      updatedShop.image = "https://" + object.public_url;
+      updatedShop.phoneImage = updatedShop.image;
+    }
     const shop = await Shop.update({_id: updatedShop._id}, updatedShop);
     res.json(updatedShop)
   } catch (error) {
