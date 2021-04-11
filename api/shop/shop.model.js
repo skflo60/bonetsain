@@ -24,6 +24,7 @@ const ShopSchema = new Schema({
   linkedin: String,
   website: String,
   orderable: { type: Boolean, default: true },
+  deliverable: { type: Boolean, default: true },
   days: { monday: {}, tuesday: {}, wednesday: {}, thursday: {}, friday: {}, saturday: {}, sunday: {} },
   openings: [{weekday: Number, start: String, end: String}],
   slotDuration: { type: Number, default: 60 },

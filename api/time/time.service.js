@@ -34,7 +34,6 @@ const addTime = (currentTime = moment(), minutes = 60) => {
 
 // Time = { weekday, start, end }, a day can have multiple time
 const getDifferentTimes = (now = moment(), ressourceTimes = [], minutes = 60) => {
-  console.log("GETTING TIME ", minutes);
   let foundTimes = [];
   let currentTime = now
   currentTime.minutes(0);
