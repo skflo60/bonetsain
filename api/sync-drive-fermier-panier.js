@@ -260,13 +260,13 @@ const getObjects = async (offset = 0, limit = 50, container_id = '5f8d55ec038155
       const power = object.public_url.includes("?profile=power") ? '' : '?profile=power';
       object.public_url = https + object.public_url + power;
     }
-    const showedPrice = Math.round(((+(domElement.find('.ty-price-num').text().trim().replace('€', '').replace(',', '.')) + 0.2) * 1.1 + Number.EPSILON) * 10) / 10;
+    const showedPrice = Math.round(((+(domElement.find('.ty-price-num').text().trim().replace('€', '').replace(',', '.')))) * 10) / 10;
     return {
       name: mapName(domElement.find('.product-title').text().trim()),
       reference: mapName(domElement.find('.product-title').text().trim()),
       price: showedPrice,
       category,
-      shop: "5ed2794fcb7cfe00177a14fa",
+      shop: "60689485b404ab00174fac0d",
       image: object.public_url,
       producerName: domElement.find('.company-name').text().trim(),
       fromDrive: true,
@@ -278,18 +278,11 @@ const getObjects = async (offset = 0, limit = 50, container_id = '5f8d55ec038155
 
   const syncDriveFermier = async () => {
     const categs = [
-      { id: "5cd9d2e91c9d440000a9b251", url: "https://drivefermier-somme.fr/amiens/fruits-et-legumes/" },
-      { id: "5f039104ceceb9b99d12ef45", url: "https://drivefermier-somme.fr/amiens/viandes-et-poissons/" },
-      { id: "5f039104ceceb9b99d12ef45", url: "https://drivefermier-somme.fr/amiens/volailles-et-oeufs/" },
-      { id: "5f039104ceceb9b99d12ef45", url: "https://drivefermier-somme.fr/amiens/produits-laitiers/" },
-      { id: "5f037f9aceceb9b99d12ef42", url: "https://drivefermier-somme.fr/amiens/epicerie-sucree/" },
-      { id: "5f037f9aceceb9b99d12ef42", url: "https://drivefermier-somme.fr/amiens/boulangerie-et-patisserie/" },
-      { id: "5f037fb1ceceb9b99d12ef43", url: "https://drivefermier-somme.fr/amiens/epicerie-salee/" },
-      { id: "5f65f3e487f96cd7362a9287", url: "https://drivefermier-somme.fr/amiens/boissons-et-alcools/" },
+      { id: "5cd9d2e91c9d440000a9b251", url: "https://drivefermier-somme.fr/amiens/fruits-et-legumes/" }
     ];
 
     const excludeList = ["Betterave cuite 0.5 kg", "BLANQUETTE DE VEAU (FLANCHET) DISPO LE 02...", "Panier de légumes 10€ 1 unité(s)", "Panier de légumes 15€ 1 unité(s)"];
-    const allowedProducers = ["PARMENTIER FRANCIS", "MIELLERIE DE L'HALLUETTE"];
+    const allowedProducers = ["PARMENTIER FRANCIS"];
 
     objects = await getObjects(0);
     console.log(objects.length);
@@ -345,14 +338,14 @@ const getObjects = async (offset = 0, limit = 50, container_id = '5f8d55ec038155
             await asyncForEach(products, async product => {
               let producerName = titleCase(product.producerName);
 
-              let producer = await Shop.findOneAndUpdate({name: producerName, affiliatedShop: "5ed2794fcb7cfe00177a14fa"}, { name: producerName, affiliatedShop: "5ed2794fcb7cfe00177a14fa", fromDrive: true}, {
+              let producer = await Shop.findOneAndUpdate({name: producerName}, { name: producerName, affiliatedShop: "60689485b404ab00174fac0d", fromDrive: true}, {
                 new: true,
                 upsert: true // Make this update into an upsert
               });
               product.producer = producer;
               let doc = null;
               product.active = true;
-              const foundProduct = await Product.findOne({reference: product.name, shop: "5ed2794fcb7cfe00177a14fa"});
+              const foundProduct = await Product.findOne({reference: product.name, shop: "60689485b404ab00174fac0d" });
               if (foundProduct) {
                 // Insert Product If Does't exist
                 doc = await Product.findOneAndUpdate({ reference: product.name }, { active: true }, {

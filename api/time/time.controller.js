@@ -16,7 +16,7 @@ exports.findAll = async (req, res, next) => {
     // Shop times
     for (let i=0; i<shopsSet.length; i++) {
       const shop = shopsSet[i];
-      foundShop = await Shop.findById(shop, "_id name openings specialty slotDuration").lean();
+      foundShop = await Shop.findById(shop, "_id name openings specialty slotDuration deliverable").lean();
 
       // Livreur
       deliveryMan = await User.findOne({_id: { $in: [req.query.deliverymen]}}).lean();
@@ -24,9 +24,13 @@ exports.findAll = async (req, res, next) => {
       // Commandes en cours
       const orders = await Order.find({ shop, selectedTime: { $gte: new Date() }});
       const unavailableTimes = (orders&&foundShop.deliverable===true) ? orders.map(o=>o.selectedTime) : []; // Remove aldready selected slots
+
       const shopTimes = getDifferentTimes(moment(), [foundShop.openings], foundShop.slotDuration);
       const deliveryTimes = getDifferentTimes(moment(), [deliveryMan.availableTimes], foundShop.slotDuration);
+
       tmpTimes.push(getTimes(shopTimes, deliveryTimes, unavailableTimes))
+
+      console.log(tmpTimes);
     }
     tmpTimes = tmpTimes.sort((a, b) => (a[0].isoDate > b[0].isoDate) ? 1 : -1)
 
