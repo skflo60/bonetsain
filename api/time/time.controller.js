@@ -22,15 +22,13 @@ exports.findAll = async (req, res, next) => {
       deliveryMan = await User.findOne({_id: { $in: [req.query.deliverymen]}}).lean();
 
       // Commandes en cours
-      const orders = await Order.find({ shop, selectedTime: { $gte: new Date() }});
+      const orders = await Order.find({ shop, state: "payment_intent.succeeded", selectedTime: { $gte: new Date() }});
       const unavailableTimes = (orders&&foundShop.deliverable===true) ? orders.map(o=>o.selectedTime) : []; // Remove aldready selected slots
 
       const shopTimes = getDifferentTimes(moment(), [foundShop.openings], foundShop.slotDuration);
       const deliveryTimes = getDifferentTimes(moment(), [deliveryMan.availableTimes], foundShop.slotDuration);
 
       tmpTimes.push(getTimes(shopTimes, deliveryTimes, unavailableTimes))
-
-      console.log(tmpTimes);
     }
     tmpTimes = tmpTimes.sort((a, b) => (a[0].isoDate > b[0].isoDate) ? 1 : -1)
 
