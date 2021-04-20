@@ -172,6 +172,7 @@ exports.validate = async (req, res, next) => {
         let lat = parseFloat(req.body.validatedAddress.lat)
         let lng = parseFloat(req.body.validatedAddress.lng)
         const shop = await Shop.findOne({ _id: req.body.shopId }).lean();
+        if (shop.deliverable) {
         ACCEPTABLE_DISTANCE = (shop.specialty === 'restaurant') ? 1500 : 6000;
         const deliveryMenNearUser = await User.aggregate([{
           $geoNear: {
@@ -194,6 +195,9 @@ exports.validate = async (req, res, next) => {
         }])
         var deliveryMen = deliveryMenNearUser.filter(n => !deliveryMenNearShop.some(n2 => n._id == n2._id));
         res.json({ result: deliveryMen.length, deliveryMen });
+      } else {
+          res.json({ result: 1, deliveryMen: [{ _id: "collect" }] });
+      }
       } catch (error) {
         console.log(error)
         res.status(500).json(error);

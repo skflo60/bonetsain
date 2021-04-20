@@ -302,7 +302,7 @@ const getObjects = async (offset = 0, limit = 50, container_id = '5f8d55ec038155
         try {
           // TODO Delete old products
           //await Product.deleteMany({ fromDrive: true });
-          await Product.updateMany({ fromDrive: true }, { active: false });
+          await Product.updateMany({ fromDrive: true, shop: "5ed2794fcb7cfe00177a14fa" }, { active: false });
           // Clean EM objects
           console.log("1/4 -> Getting products for category " + categ.url.replace("https://drivefermier-somme.fr/amiens/", ""));
           request

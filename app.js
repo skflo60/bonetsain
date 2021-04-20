@@ -9,6 +9,7 @@ const model = require('./app.model');
 const cron = require('node-cron');
 const compression = require('compression');
 const syncDriveFermier = require('./api/sync-drive-fermier');
+const syncDriveFermierPanier = require('./api/sync-drive-fermier-panier');
 
 // Compress all HTTP responses
 app.use(compression());
@@ -46,8 +47,8 @@ app.use(routes);
 
 cron.schedule('30 2 * * *', () => {
   syncDriveFermier();
+  syncDriveFermierPanier();
 });
-// syncDriveFermier();
 
 
 // Catch 404 and forward to error handler

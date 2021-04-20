@@ -18,17 +18,23 @@ exports.findAll = async (req, res, next) => {
       const shop = shopsSet[i];
       foundShop = await Shop.findById(shop, "_id name openings specialty slotDuration deliverable").lean();
 
-      // Livreur
-      deliveryMan = await User.findOne({_id: { $in: [req.query.deliverymen]}}).lean();
-
-      // Commandes en cours
-      const orders = await Order.find({ shop, state: "payment_intent.succeeded", selectedTime: { $gte: new Date() }});
-      const unavailableTimes = (orders&&foundShop.deliverable===true) ? orders.map(o=>o.selectedTime) : []; // Remove aldready selected slots
-
+      // Horaires de la boutique du vendeur
       const shopTimes = getDifferentTimes(moment(), [foundShop.openings], foundShop.slotDuration);
-      const deliveryTimes = getDifferentTimes(moment(), [deliveryMan.availableTimes], foundShop.slotDuration);
 
-      tmpTimes.push(getTimes(shopTimes, deliveryTimes, unavailableTimes))
+      if (foundShop.deliverable===true) {
+        // Livreur
+        deliveryMan = await User.findOne({_id: { $in: [req.query.deliverymen]}}).lean();
+
+        // Commandes en cours
+        const orders = await Order.find({ shop, state: "payment_intent.succeeded", selectedTime: { $gte: new Date() }});
+        const unavailableTimes = orders ? orders.map(o=>o.selectedTime) : []; // Remove aldready selected slots
+
+        const deliveryTimes = getDifferentTimes(moment(), [deliveryMan.availableTimes], foundShop.slotDuration);
+
+        tmpTimes.push(getTimes(shopTimes, deliveryTimes, unavailableTimes))
+      } else {
+        tmpTimes.push(getTimes(shopTimes, shopTimes, []));
+      }
     }
     tmpTimes = tmpTimes.sort((a, b) => (a[0].isoDate > b[0].isoDate) ? 1 : -1)
 
