@@ -10,6 +10,8 @@ const ProductSchema = new Schema({
   price: Number,
   costPrice: Number,
   quantity: Number,
+  costPrice: Number,
+  deposit: Number,
   unit: String,
   stock: Number,
   weight: Number,
