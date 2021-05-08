@@ -10,7 +10,7 @@ const cron = require('node-cron');
 const compression = require('compression');
 const syncDriveFermier = require('./api/sync-drive-fermier');
 const syncDriveFermierPanier = require('./api/sync-drive-fermier-panier');
-
+const syncNewDriveFermier = require('./api/sync-new-drive-fermier');
 // Compress all HTTP responses
 app.use(compression());
 app.use(express.json({limit: '50mb'}));
@@ -46,11 +46,8 @@ app.use('/static', express.static('./static'));
 app.use(routes);
 
 cron.schedule('30 2 * * *', () => {
-  syncDriveFermier();
-  syncDriveFermierPanier();
+  syncNewDriveFermier()
 });
-
-
 // Catch 404 and forward to error handler
 app.use((req, res, next) => {
   const err = new Error('Not Found');
