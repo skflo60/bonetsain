@@ -20,6 +20,7 @@ const ProductSchema = new Schema({
   image: String,
   description: String,
   alcohol: Boolean,
+  bio: Boolean,
   shop: { type: Schema.ObjectId, ref: 'Shop' },
   months: [Number],
   sells: Number,
