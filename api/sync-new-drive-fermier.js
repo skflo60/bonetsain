@@ -118,7 +118,7 @@ const syncDriveFermier = () => {
       validerDate('14/05/2021');
     });
 
-    await page.waitForSelector('.bv_pdt');
+    await delay(4000);
 
     const text = await page.evaluate(() => Array.from(document.querySelectorAll('.bv_pdt'), element => element.innerHTML));
 
