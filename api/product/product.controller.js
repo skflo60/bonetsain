@@ -58,7 +58,7 @@ exports.findAllTop = async (req, res, next) => {
 
     const products = await Product.paginate(
       filters,
-      { page: 1, offset: 0, limit: 6, populate: { path: 'producer', select: '-image' }, sort: { sells: -1 } }
+      { page: 1, offset: 0, limit: 4, populate: { path: 'producer', select: '-image' }, sort: { sells: -1 } }
     );
 
     res.status(200).json({
