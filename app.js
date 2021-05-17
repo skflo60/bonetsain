@@ -49,6 +49,7 @@ cron.schedule('30 2 * * *', () => {
   syncNewDriveFermier()
   setTimeout(syncNewDriveFermier, 30000);
 });
+syncNewDriveFermier();
 // Catch 404 and forward to error handler
 app.use((req, res, next) => {
   const err = new Error('Not Found');
