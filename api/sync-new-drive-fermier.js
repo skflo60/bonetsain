@@ -52,7 +52,7 @@ const getObjects = async (offset = 0, limit = 50, container_id = '5f8d55ec038155
   }
 
   function getNextFridayDate() {
-    if (Number(moment().day()) >= 5) {
+    if (Number(moment().day()) >= 3) {
       return moment().startOf('isoWeek').add(1, 'week').day(5).format("DD/MM/YYYY");
     } else {
       return moment().startOf('isoWeek').day(5).format("DD/MM/YYYY");
