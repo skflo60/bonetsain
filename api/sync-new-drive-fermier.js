@@ -116,6 +116,12 @@ const getObjects = async (offset = 0, limit = 50, container_id = '5f8d55ec038155
 
       await page.click('.resume-bloc .bouton_action');
 
+      await delay(3000);
+
+      await page.click('.resume-bloc .bouton_action');
+
+      await delay(3000);
+
       await page.click('.resume-bloc .bouton_action');
 
       let selector = 'input[type=radio]';
