@@ -182,6 +182,14 @@ exports.remove = async (req, res, next) => {
 exports.create = async (req, res, next) => {
   try {
     const createdProduct = req.body;
+
+    // If image is base64 convert it to url
+    if (isBase64(createdProduct.image)) {
+      const file = { name: createdProduct.name + '_' + Math.random().toString(36).substr(2, 9), data: createdProduct.image, mimetype: base64MimeType(createdProduct.image)};
+      object = await createObject("5f8d55ec03815518b10a4700", file, {});
+      createdProduct.image = "https://" + object.public_url;
+    }
+
     const product = await Product.create(createdProduct);
     res.json(product)
   } catch (error) {
