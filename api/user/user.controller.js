@@ -75,9 +75,6 @@ module.exports = {
       const password = [...Array(30)].map(() => Math.random().toString(36)[3]).join('');
 
       const existingShop = await User.findOne({ email });
-      if (existingShop) {
-        res.status(400).json("Shop déjà pris")
-      }
 
       if (!location) {
         location = [0, 0];
@@ -91,20 +88,23 @@ module.exports = {
         location: { type: "Point", coordinates: location }
       });
 
-
       const persistedShop = await shop.save();
 
-      let user = await User.findOne({ username: email });
-      if (!user) {
-        user = new User({
-          username: email,
-          email,
-          password,
-          location: { type: "Point", coordinates: location },
-          shop: persistedShop._id
-        });
+      if (!existingShop) {
+        let user = await User.findOne({ username: email });
+        if (!user) {
+          user = new User({
+            username: email,
+            email,
+            password,
+            location: { type: "Point", coordinates: location },
+            shop: persistedShop._id
+          });
 
-        const persistedUser = await user.save();
+          const persistedUser = await user.save();
+        }
+      } else {
+        await User.findOneAndUpdate({ username: email }, { shop: persistedShop._id });
       }
 
       product.shop = persistedShop._id;
