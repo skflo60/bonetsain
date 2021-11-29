@@ -8,7 +8,7 @@ const timeRoute = require('./time');
 const categoryRoute = require('./category');
 const orderRoute = require('./order');
 const recipeRoute = require('./recipe');
-const mailRoute = require('./mail');
+const mailRoute = require('./utils');
 const seederRoute = require('./seeder');
 
 router.use('/api/checkouts', checkoutRoute);
