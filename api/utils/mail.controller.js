@@ -10,8 +10,7 @@ exports.sendMail = async (req, res, next) => {
         <br />
         <div>${name}</div>
         <div>${email}</div>`;
-        sendMail('fwattier@live.fr', [], {}, null, 'Nouveau message depuis vendezlocal.fr');
-        console.log("MAIL SENT !");
+        sendMail('fwattier@live.fr', [], {}, content, 'Nouveau message depuis vendezlocal.fr');
       } catch (e) {
         console.log(e);
       }
