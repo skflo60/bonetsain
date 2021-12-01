@@ -84,6 +84,7 @@ module.exports = {
         name,
         email,
         color,
+        image: product.image,
         city: address,
         location: { type: "Point", coordinates: location }
       });
