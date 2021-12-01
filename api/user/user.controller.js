@@ -86,7 +86,8 @@ module.exports = {
         color,
         image: product.image,
         city: address,
-        location: { type: "Point", coordinates: location }
+        location: { type: "Point", coordinates: location },
+        orderable: true
       });
 
       const persistedShop = await shop.save();
