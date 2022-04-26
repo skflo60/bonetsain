@@ -95,8 +95,10 @@ module.exports = {
       const persistedShop = await shop.save();
 
       if (!existingShop) {
+
         const hash = await bcrypt.hash(password, saltRounds);
-          user = new User({
+
+          let user = new User({
             username: email,
             email,
             password: hash,
