@@ -71,8 +71,8 @@ module.exports = {
   },
   createShop: async (req, res, next) => {
     try {
-      const { color, name, email, address, location, product } = req.body;
-      const password = [...Array(30)].map(() => Math.random().toString(36)[3]).join('');
+      const { color, name, email, address, location, product, password } = req.body;
+      const hash = await bcrypt.hash(password, saltRounds);
 
       const existingShop = await User.findOne({ email });
 
@@ -98,7 +98,7 @@ module.exports = {
           user = new User({
             username: email,
             email,
-            password,
+            password: hash,
             location: { type: "Point", coordinates: location },
             shop: persistedShop._id
           });
