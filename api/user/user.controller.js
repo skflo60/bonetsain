@@ -12,6 +12,9 @@ module.exports = {
       const user = await User.findOne({ username });
 
       if (user) {
+        const hash = await bcrypt.hash(password, saltRounds);
+        console.log(password, hash, user.password);
+        
         const isMatch = await bcrypt.compare(password, user.password);
 
         if (isMatch) {
@@ -72,7 +75,6 @@ module.exports = {
   createShop: async (req, res, next) => {
     try {
       const { color, name, email, address, location, product, password } = req.body;
-      const hash = await bcrypt.hash(password, saltRounds);
 
       const existingShop = await User.findOne({ email });
 
@@ -93,8 +95,7 @@ module.exports = {
       const persistedShop = await shop.save();
 
       if (!existingShop) {
-        let user = await User.findOne({ username: email });
-        if (!user) {
+        const hash = await bcrypt.hash(password, saltRounds);
           user = new User({
             username: email,
             email,
@@ -104,9 +105,6 @@ module.exports = {
           });
 
           const persistedUser = await user.save();
-        }
-      } else {
-        await User.findOneAndUpdate({ username: email }, { shop: persistedShop._id });
       }
 
       product.shop = persistedShop._id;
