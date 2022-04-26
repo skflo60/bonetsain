@@ -70,7 +70,7 @@ const getObjects = async (offset = 0, limit = 50, container_id = '5f8d55ec038155
 
   const mapProduct = async ($, category = "5cd9d2e91c9d440000a9b251") => {
     let image = '/legumes.jpg';
-    const showedPrice = Math.round(((+($('.prix').text().trim().replace('€', '').replace(',', '.')) + 0.2) * 1.2 + Number.EPSILON) * 10) / 10;
+    const showedPrice = Math.round(((+($('.prix').text().trim().replace('€', '').replace(',', '.')))));
     return {
       name: mapName($('.bv_pdt_titre > h2').text().trim()),
       reference: mapName($('.bv_pdt_titre > h2').text().trim()),

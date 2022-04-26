@@ -19,6 +19,7 @@ const ProductSchema = new Schema({
   producer: { type: Schema.ObjectId, ref: 'Shop' },
   image: String,
   description: String,
+  customFields: [Object],
   alcohol: Boolean,
   bio: Boolean,
   shop: { type: Schema.ObjectId, ref: 'Shop' },
